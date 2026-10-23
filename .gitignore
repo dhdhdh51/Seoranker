@@ -13,3 +13,4 @@ storage/installed.lock
 /vendor/
 .DS_Store
 *.swp
+!storage/.htaccess
