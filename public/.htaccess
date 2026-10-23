@@ -1,0 +1,38 @@
+# Bharat SEO — public web root rules (Apache / LiteSpeed, as used by cPanel and aPanel)
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Uncomment if the app lives in a sub-folder and rewrites fail:
+  # RewriteBase /seo/
+
+  # Never serve hidden files (.git, .env, .htaccess ...)
+  RewriteRule (^|/)\. - [F,L]
+
+  # Front controller for everything that is not a real file
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Block direct access to sensitive file types that should never be public
+<FilesMatch "\.(sql|log|ini|lock|bak|sh|md|dist|env|example|tpl|phar|zip|tar|gz)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  <FilesMatch "\.(css|js|woff2?|png|svg|ico)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_php.c>
+  php_flag display_errors Off
+  php_flag expose_php Off
+  php_value upload_max_filesize 16M
+  php_value post_max_size 20M
+</IfModule>

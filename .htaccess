@@ -1,0 +1,28 @@
+# Bharat SEO — application root rules.
+#
+# RECOMMENDED: set the domain/sub-domain document root to the "public" folder.
+# If your host forces the document root to this folder (e.g. you uploaded
+# everything into public_html), these rules route requests into public/ and
+# deny direct access to application code, config, storage, database and tests.
+
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # RewriteBase /
+
+  # Deny private directories and hidden files outright
+  RewriteRule ^(app|bin|config|cron|database|storage|tests|views|vendor)(/|$) - [F,L]
+  RewriteRule (^|/)\. - [F,L]
+
+  # Everything else goes to public/
+  RewriteCond %{REQUEST_URI} !^/public/
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "\.(sql|log|ini|lock|bak|sh|md|dist|env|example|json|xml|yml|yaml|phar|zip|tar|gz)$">
+  Require all denied
+</FilesMatch>
+<Files "composer.*">
+  Require all denied
+</Files>

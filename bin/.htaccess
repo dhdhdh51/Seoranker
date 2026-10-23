@@ -1,0 +1,6 @@
+# Private storage: logs, uploads, exports, sessions, locks, mail, backups. Never web-accessible.
+Require all denied
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

@@ -1,0 +1,15 @@
+# Secrets / local config — never commit
+config/config.php
+/bharatseo-private/
+.env
+
+# Runtime data
+storage/**/*
+!storage/**/
+!storage/**/.gitkeep
+storage/installed.lock
+
+# Tooling
+/vendor/
+.DS_Store
+*.swp
