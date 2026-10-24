@@ -22,7 +22,7 @@ final class Config
     {
         return [
             'app' => [
-                'name' => 'Bharat SEO',
+                'name' => 'NoidaRankers',
                 'url' => '',
                 'env' => 'production',
                 'debug' => false,

@@ -115,4 +115,29 @@ final class ClientService
         $this->gate->flush();
         $this->app->make(AuditLogger::class)->log('client.user_detached', $actor->id, null, ['user_id' => $userId], 'client', null, $clientId, $clientId);
     }
+
+    /**
+     * Give a person access to this client's projects: attach an existing Client-role user,
+     * or create a new Client-role account first. Returns the user id.
+     */
+    public function grantAccess(User $actor, int $clientId, array $input): int
+    {
+        $this->gate->requireRole($actor, User::SUPER_ADMIN);
+        $this->find($actor, $clientId);
+        $canApprove = !empty($input['can_approve']);
+        $canExport = !empty($input['can_export']);
+        $userId = (int)($input['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $email = strtolower(trim((string)($input['email'] ?? '')));
+            $existing = $this->db->fetch('SELECT id, role FROM users WHERE email = ?', [$email]);
+            if ($existing && $existing['role'] !== User::CLIENT) {
+                throw ValidationException::single('email', 'That email belongs to a staff account; client access needs a Client-role user.');
+            }
+            $userId = $existing ? (int)$existing['id'] : $this->app->make(UserService::class)->save($actor, null, [
+                'name' => $input['name'] ?? '', 'email' => $email, 'role' => User::CLIENT, 'status' => 'active', 'password' => $input['password'] ?? '',
+            ]);
+        }
+        $this->attachUser($actor, $clientId, $userId, $canApprove, $canExport);
+        return $userId;
+    }
 }

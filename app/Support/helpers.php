@@ -160,3 +160,26 @@ function ext_link(?string $href, ?string $text = null, int $limit = 60): string
     }
     return '<a href="' . e($href) . '" target="_blank" rel="noopener noreferrer nofollow">' . e(str_limit($text ?? $href, $limit)) . ' <i class="bi bi-box-arrow-up-right small"></i></a>';
 }
+
+/** Product / agency name shown in the UI and emails (Settings → General → Agency name). */
+function brand(): string
+{
+    static $name = null;
+    if ($name !== null) {
+        return $name;
+    }
+    $name = 'NoidaRankers';
+    try {
+        if (App::hasInstance()) {
+            $name = (string)(app()->settings()->get('app.agency_name') ?: app()->config->get('app.name', $name));
+        }
+    } catch (Throwable) {
+        // settings table unavailable (installer)
+    }
+    return $name;
+}
+
+function brand_initial(): string
+{
+    return mb_strtoupper(mb_substr(brand(), 0, 1));
+}

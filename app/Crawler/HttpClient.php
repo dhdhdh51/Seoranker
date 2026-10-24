@@ -31,7 +31,7 @@ class HttpClient implements PageFetcher
 
     public function userAgent(): string
     {
-        $default = 'BharatSEOBot/1.0 (+' . rtrim((string)$this->app->config->get('app.url', ''), '/') . '/bot.html)';
+        $default = 'NoidaRankersBot/1.0 (+' . rtrim((string)$this->app->config->get('app.url', ''), '/') . '/bot.html)';
         $ua = (string)$this->setting('crawler.user_agent', '');
         return $ua !== '' ? $ua : $default;
     }
@@ -72,7 +72,7 @@ class HttpClient implements PageFetcher
             }
             // robots.txt itself (and owner-requested verification fetches) do not consume the per-domain slot,
             // so the first real page request to a new domain is not deferred by its own robots.txt lookup.
-            if (($options['rate_limit'] ?? $respectRobots) && !$this->waitForSlot($check['host'], $delay)) {
+            if (($options['rate_limit'] ?? $respectRobots) && !$this->waitForSlot($check['host'], $delay, isset($options['interval_ms']) ? (int)$options['interval_ms'] : null)) {
                 return HttpResponse::failure($current, HttpResponse::ERR_RATE_LIMITED, 'Per-domain request rate limit reached; will retry later.', $chain);
             }
 
@@ -110,9 +110,10 @@ class HttpClient implements PageFetcher
     }
 
     /** Respect the configured per-domain interval (and robots Crawl-delay). Waits up to 5 seconds. */
-    protected function waitForSlot(string $host, ?float $crawlDelay): bool
+    protected function waitForSlot(string $host, ?float $crawlDelay, ?int $intervalOverride = null): bool
     {
-        $interval = (int)$this->setting('crawler.domain_interval_ms', 3000);
+        // Override is used for audits of a project's own, ownership-verified site (min 500 ms).
+        $interval = $intervalOverride !== null ? max(500, $intervalOverride) : (int)$this->setting('crawler.domain_interval_ms', 3000);
         if ($crawlDelay !== null) {
             $interval = max($interval, (int)($crawlDelay * 1000));
         }

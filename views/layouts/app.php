@@ -14,6 +14,7 @@ $nav = [
     ['/outreach', 'envelope-paper', 'Outreach', $settings->moduleEnabled('outreach')],
     ['/backlinks', 'link-45deg', 'Backlink monitor', $settings->moduleEnabled('monitoring')],
     ['/backlinks/history', 'clock-history', 'Backlink history', $settings->moduleEnabled('monitoring')],
+    ['/audits', 'clipboard2-pulse', 'Site audit', $settings->moduleEnabled('audit')],
     ['/reports', 'file-earmark-bar-graph', 'Reports & exports', $settings->moduleEnabled('reports')],
 ];
 $adminNav = [
@@ -38,7 +39,7 @@ $isActive = static function (string $href) use ($path): bool {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title><?= e($title ?? 'Bharat SEO') ?> · Bharat SEO</title>
+<title><?= e($title ?? brand()) ?> · <?= e(brand()) ?></title>
 <script src="<?= e(asset('js/theme.js')) ?>"></script>
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/bootstrap.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">
@@ -50,8 +51,8 @@ $isActive = static function (string $href) use ($path): bool {
   <aside class="app-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-label="Main navigation">
     <div class="sidebar-brand">
       <a href="<?= e(url('/')) ?>" class="d-flex align-items-center gap-2 text-decoration-none">
-        <span class="brand-mark">B</span>
-        <span><span class="brand-name">Bharat SEO</span><small class="d-block brand-sub">Backlink Automation</small></span>
+        <span class="brand-mark"><?= e(brand_initial()) ?></span>
+        <span><span class="brand-name"><?= e(brand()) ?></span><small class="d-block brand-sub">SEO &amp; Backlink Suite</small></span>
       </a>
       <button type="button" class="btn-close btn-close-white d-lg-none ms-auto" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Close"></button>
     </div>
@@ -88,6 +89,9 @@ $isActive = static function (string $href) use ($path): bool {
             <li><span class="dropdown-item-text small text-body-secondary"><?= e($u->email) ?><br><?= e($u->roleLabel()) ?></span></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="<?= e(url('/profile')) ?>"><i class="bi bi-person me-2"></i>Profile</a></li>
+            <?php if (app()->make(\BharatSeo\Services\SsoService::class)->allowed($u)): ?>
+              <li><a class="dropdown-item" href="<?= e(url('/sso/website')) ?>"><i class="bi bi-globe me-2"></i>Open website admin</a></li>
+            <?php endif; ?>
             <li>
               <form method="post" action="<?= e(url('/logout')) ?>"><?= csrf_field() ?><button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button></form>
             </li>
@@ -103,7 +107,7 @@ $isActive = static function (string $href) use ($path): bool {
       <?= $content ?>
     </main>
     <footer class="app-footer small text-body-secondary">
-      Bharat SEO · Quality scores are internal heuristics — not PageRank, DA or DR — and never a ranking guarantee.
+      <?= e(brand()) ?> · Quality scores are internal heuristics — not PageRank, DA or DR — and never a ranking guarantee.
     </footer>
   </div>
 </div>

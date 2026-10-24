@@ -31,7 +31,7 @@ final class App
             $config = Config::load();
             if ($config === null) {
                 if ($requireConfig) {
-                    throw new NotInstalledException('Bharat SEO is not installed yet.');
+                    throw new NotInstalledException('NoidaRankers is not installed yet.');
                 }
                 $config = new Config([], null);
             }

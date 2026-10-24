@@ -57,6 +57,9 @@ final class ProjectController extends Controller
             'verification' => $svc->verificationInstructions($p),
             'canManage' => $this->gate->can($user, Gate::MANAGE, $id),
             'activity' => $this->app->make(DashboardService::class)->activity($user, $id, 10),
+            'clientUsers' => $user->isSuperAdmin() ? $this->app->make(\BharatSeo\Services\ClientService::class)->users((int)$p['client_id']) : [],
+            'clientUserOptions' => $user->isSuperAdmin() ? $this->app->make(UserService::class)->clientUsers() : [],
+            'lastAudit' => $this->app->db()->fetch('SELECT id, status, score, finished_at FROM site_audits WHERE project_id = ? ORDER BY id DESC LIMIT 1', [$id]),
         ]);
     }
 
@@ -114,6 +117,22 @@ final class ProjectController extends Controller
     {
         $this->svc()->removeMember($this->user(), $id, $uid);
         $this->flash('success', 'Team member removed.');
+        return $this->redirect('/projects/' . $id);
+    }
+
+    public function addClientUser(int $id): Response
+    {
+        $p = $this->svc()->find($this->user(), $id);
+        $this->app->make(\BharatSeo\Services\ClientService::class)->grantAccess($this->user(), (int)$p['client_id'], $this->req->all());
+        $this->flash('success', 'Client access saved. The user can now sign in and see this client\'s projects.');
+        return $this->redirect('/projects/' . $id);
+    }
+
+    public function removeClientUser(int $id, int $uid): Response
+    {
+        $p = $this->svc()->find($this->user(), $id);
+        $this->app->make(\BharatSeo\Services\ClientService::class)->detachUser($this->user(), (int)$p['client_id'], $uid);
+        $this->flash('success', 'Client access removed.');
         return $this->redirect('/projects/' . $id);
     }
 

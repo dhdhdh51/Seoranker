@@ -254,7 +254,7 @@ final class QualityScorer
                 $score += 1;
                 $notes[] = 'Canonical points to another URL on the same site (+1).';
             }
-            $spam = self::firstHit(self::SPAM_TERMS, $text . ' ' . mb_strtolower((string)($p['title'] ?? '')));
+            $spam = self::spamHit($text . ' ' . mb_strtolower((string)($p['title'] ?? '')));
             if ($spam === null) {
                 $score += 5;
                 $notes[] = 'No high-risk spam vocabulary found (+5).';
@@ -437,6 +437,28 @@ final class QualityScorer
         foreach ($terms as $t) {
             if ($t !== '' && preg_match('/(?<![\p{L}\p{N}])' . preg_quote($t, '/') . '(?![\p{L}\p{N}])/u', $haystack)) {
                 return $t;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * First high-risk term that is NOT just part of an exclusion rule such as
+     * "we do not accept casino, gambling or CBD posts" (common on guest-post guideline pages).
+     */
+    public static function spamHit(string $text): ?string
+    {
+        $negation = '/(do not|don\'t|dont|does not|doesn\'t|will not|won\'t|never|not|no)\s+(accept|allow|publish|entertain|take|consider|cover|promote)|not allowed|prohibited|forbidden|banned|restricted|exclud|we reject|off-limits|avoid|no\s+(casino|gambling|adult|crypto|cbd|pharma|betting)/i';
+        foreach (self::SPAM_TERMS as $t) {
+            if (!preg_match_all('/(?<![\p{L}\p{N}])' . preg_quote($t, '/') . '(?![\p{L}\p{N}])/u', $text, $m, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+            foreach ($m[0] as [, $offset]) {
+                $before = substr($text, max(0, $offset - 160), min(160, $offset));
+                $sentence = preg_split('/[.!?\n]\s/u', $before);
+                if (!preg_match($negation, (string)end($sentence))) {
+                    return $t;
+                }
             }
         }
         return null;

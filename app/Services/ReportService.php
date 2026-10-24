@@ -129,7 +129,7 @@ final class ReportService
                 Csv::writeRow($out, ['ID', 'Project', 'Referring page', 'Referring domain', 'Target URL', 'Expected anchor', 'Observed anchor', 'HTTP status', 'rel', 'Link present in fetched HTML', 'Status', 'Lifecycle', 'First detected (UTC)', 'Last verified (UTC)', 'Last checked (UTC)', 'Last error', 'Note']);
                 $stmt = $this->db->run("SELECT b.*, p.name AS project_name FROM backlink_records b JOIN projects p ON p.id = b.project_id $where ORDER BY b.id$limit", $params);
                 while ($r = $stmt->fetch()) {
-                    $write([$r['id'], $r['project_name'], $r['referring_page_url'], $r['referring_domain'], $r['target_url'], $r['expected_anchor'], $r['observed_anchor'], $r['http_status'], $r['rel_attributes'], $r['link_present'] === null ? 'unknown' : ($r['link_present'] ? 'yes' : 'no'), Labels::BACKLINK_STATUSES[$r['status']] ?? $r['status'], Labels::LIFECYCLE[$r['lifecycle']] ?? $r['lifecycle'], $r['first_detected_at'], $r['last_verified_at'], $r['last_checked_at'], $r['last_error'], 'Observed by Bharat SEO crawler; not a search-engine index claim']);
+                    $write([$r['id'], $r['project_name'], $r['referring_page_url'], $r['referring_domain'], $r['target_url'], $r['expected_anchor'], $r['observed_anchor'], $r['http_status'], $r['rel_attributes'], $r['link_present'] === null ? 'unknown' : ($r['link_present'] ? 'yes' : 'no'), Labels::BACKLINK_STATUSES[$r['status']] ?? $r['status'], Labels::LIFECYCLE[$r['lifecycle']] ?? $r['lifecycle'], $r['first_detected_at'], $r['last_verified_at'], $r['last_checked_at'], $r['last_error'], 'Observed by ' . brand() . ' crawler; not a search-engine index claim']);
                 }
                 break;
             case 'history':
@@ -169,7 +169,7 @@ final class ReportService
                     throw new \BharatSeo\Core\ValidationException(['project_id' => 'Select a project.']);
                 }
                 $rep = $this->projectReport($user, $projectId, $f['from'] ?? null, $f['to'] ?? null);
-                $write(['Bharat SEO project report', $rep['project']['name']]);
+                $write([brand() . ' project report', $rep['project']['name']]);
                 $write(['Generated', fmt_dt($rep['generated_at'], 'Y-m-d H:i T')]);
                 $write(['Period', ($rep['from'] ?: 'all time') . ' – ' . ($rep['to'] ?: 'today')]);
                 $write([]);

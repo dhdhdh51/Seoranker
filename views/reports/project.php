@@ -35,7 +35,7 @@ $q = array_filter(['project_id' => $p['id'], 'from' => $r['from'], 'to' => $r['t
   </div>
 </div>
 <header class="report-head mb-4">
-  <div class="d-flex align-items-center gap-2"><span class="brand-mark">B</span><span class="fw-bold">Bharat SEO</span></div>
+  <div class="d-flex align-items-center gap-2"><span class="brand-mark"><?= e(brand_initial()) ?></span><span class="fw-bold"><?= e(brand()) ?></span></div>
   <h1 class="h3 mt-3 mb-1">Backlink report · <?= e($p['name']) ?></h1>
   <div class="text-body-secondary small"><?= e($p['client_name']) ?> · <?= e($p['domain']) ?> · Period: <?= e($r['from'] ?: 'all time') ?> – <?= e($r['to'] ?: 'today') ?></div>
   <div class="text-body-secondary small">Generated <?= e(fmt_dt($r['generated_at'], 'd M Y, H:i T')) ?> from live records.</div>
@@ -71,6 +71,6 @@ $q = array_filter(['project_id' => $p['id'], 'from' => $r['from'], 'to' => $r['t
   </tbody></table><?php endif; ?>
 </section>
 <footer class="small text-body-secondary border-top pt-3">
-  Quality scores are Bharat SEO’s internal heuristic, not Google PageRank, Domain Authority or Domain Rating, and are not a ranking guarantee.
+  Quality scores are <?= e(brand()) ?>’s internal heuristic, not Google PageRank, Domain Authority or Domain Rating, and are not a ranking guarantee.
   Backlink statuses are observations of fetched HTML by our crawler and are not search-engine index data. Discovered opportunities are not acquired backlinks.
 </footer>

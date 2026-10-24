@@ -82,18 +82,18 @@ $php = Installer::cliBinaryGuess() ?? '/usr/local/bin/php';
 <html lang="en" data-bs-theme="light">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>Install · Bharat SEO</title>
+<title>Install · NoidaRankers</title>
 <link rel="stylesheet" href="assets/vendor/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body class="auth-body">
 <main class="container py-5" style="max-width: 920px">
-  <div class="d-flex align-items-center gap-2 mb-4"><span class="brand-mark">B</span><div><div class="fw-bold fs-4">Bharat SEO installer</div><div class="small text-body-secondary">Version <?= e(APP_VERSION) ?> · PHP <?= e(PHP_VERSION) ?></div></div></div>
+  <div class="d-flex align-items-center gap-2 mb-4"><span class="brand-mark">N</span><div><div class="fw-bold fs-4">NoidaRankers installer</div><div class="small text-body-secondary">Version <?= e(APP_VERSION) ?> · PHP <?= e(PHP_VERSION) ?></div></div></div>
 
 <?php if ($locked): ?>
   <div class="card card-soft"><div class="card-body p-4">
     <h1 class="h4">Installer locked</h1>
-    <p>Bharat SEO is already installed. For security the installer cannot be run again. Delete <code>public/install.php</code> from the server. To reinstall, follow UPGRADE.md (back up, then remove the config file and <code>storage/installed.lock</code>).</p>
+    <p>NoidaRankers is already installed. For security the installer cannot be run again. Delete <code>public/install.php</code> from the server. To reinstall, follow UPGRADE.md (back up, then remove the config file and <code>storage/installed.lock</code>).</p>
     <a class="btn btn-primary" href="./">Go to sign in</a>
   </div></div>
 <?php elseif ($done): ?>
@@ -142,7 +142,7 @@ $php = Installer::cliBinaryGuess() ?? '/usr/local/bin/php';
       <div class="col-md-6"><label class="form-label">Password</label><input class="form-control" type="password" name="admin_password" required minlength="10" autocomplete="new-password"><div class="form-text">At least 10 characters, letters plus a number or symbol.</div></div>
       <div class="col-md-6"><label class="form-label">Confirm password</label><input class="form-control" type="password" name="admin_password_confirmation" required autocomplete="new-password"></div>
       <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="delete_installer" value="1" id="di" checked><label class="form-check-label" for="di">Delete this installer file after a successful installation</label></div></div>
-      <div class="col-12"><button class="btn btn-primary btn-lg">Install Bharat SEO</button></div>
+      <div class="col-12"><button class="btn btn-primary btn-lg">NoidaRankers/button></div>
     </div>
   </form>
 <?php endif; ?>

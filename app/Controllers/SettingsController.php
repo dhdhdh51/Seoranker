@@ -14,13 +14,15 @@ final class SettingsController extends Controller
 {
     public const GROUPS = [
         'General' => ['app.agency_name', 'app.timezone'],
-        'Modules' => ['module.discovery', 'module.outreach', 'module.monitoring', 'module.reports', 'module.search_api', 'module.local_ai'],
+        'Modules' => ['module.discovery', 'module.outreach', 'module.monitoring', 'module.reports', 'module.audit', 'module.search_api', 'module.local_ai'],
         'Outreach limits' => ['outreach.daily_limit', 'outreach.per_project_daily_limit', 'outreach.domain_cooldown_days', 'outreach.max_send_attempts', 'outreach.auto_follow_up_drafts', 'outreach.physical_address'],
         'SMTP' => ['smtp.driver', 'smtp.host', 'smtp.port', 'smtp.encryption', 'smtp.username', 'smtp.password', 'smtp.from_email', 'smtp.from_name', 'smtp.timeout'],
         'Crawler & request limits' => ['crawler.user_agent', 'crawler.connect_timeout', 'crawler.timeout', 'crawler.max_bytes', 'crawler.max_redirects', 'crawler.domain_interval_ms', 'crawler.retries', 'crawler.daily_fetch_limit'],
         'Backlink monitoring' => ['monitor.interval_days', 'monitor.retry_hours', 'monitor.confirmations', 'monitor.failure_threshold', 'monitor.max_checks_per_run'],
         'Discovery & search API (optional)' => ['search.provider', 'search.api_key', 'search.cse_id', 'search.searxng_url', 'search.daily_quota', 'discovery.max_results_per_query', 'discovery.public_page_max_links', 'discovery.blocklist', 'safebrowsing.api_key'],
         'Local AI model (optional)' => ['ai.endpoint', 'ai.model', 'ai.api_key', 'ai.timeout'],
+        'Site audit' => ['audit.interval_ms'],
+        'Website single sign-on' => ['sso.website_enabled', 'sso.website_url', 'sso.secret', 'sso.roles'],
         'Queue & cron' => ['queue.max_runtime_seconds', 'queue.max_jobs_per_run', 'queue.default_max_attempts', 'cron.expected_interval_minutes'],
         'Security' => ['security.session_idle_minutes', 'security.upload_max_mb'],
     ];
@@ -95,7 +97,7 @@ final class SettingsController extends Controller
     public function testSmtp(): Response
     {
         try {
-            $id = $this->app->make(MailerService::class)->sendSystemMail($this->user()->email, 'Bharat SEO SMTP test', "This is a test email from Bharat SEO.\n\nIf you received it, SMTP is configured correctly.");
+            $id = $this->app->make(MailerService::class)->sendSystemMail($this->user()->email, brand() . ' SMTP test', "This is a test email from " . brand() . ".\n\nIf you received it, SMTP is configured correctly.");
             $this->flash('success', 'Test email accepted by the mail server (Message-ID ' . $id . ').');
             $this->app->make(AuditLogger::class)->log('settings.smtp_test', $this->user()->id, null, ['ok' => true]);
         } catch (\Throwable $e) {

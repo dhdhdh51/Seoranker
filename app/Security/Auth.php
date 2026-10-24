@@ -173,11 +173,11 @@ final class Auth
         $this->audit()->log('auth.password_reset_requested', (int)$row['id'], null, [], null, $ip);
         if ($sendEmail) {
             $link = absolute_url('/reset-password?token=' . $token);
-            $body = "Hello {$row['name']},\n\nA password reset was requested for your Bharat SEO account.\n"
+            $body = "Hello {$row['name']},\n\nA password reset was requested for your " . brand() . " account.\n"
                 . "Open this link within " . self::RESET_TTL_MINUTES . " minutes to choose a new password:\n\n$link\n\n"
-                . "If you did not request this, you can ignore this email.\n\n— Bharat SEO";
+                . "If you did not request this, you can ignore this email.\n\n— " . brand();
             try {
-                $this->app->make(MailerService::class)->sendSystemMail($row['email'], 'Reset your Bharat SEO password', $body);
+                $this->app->make(MailerService::class)->sendSystemMail($row['email'], 'Reset your ' . brand() . ' password', $body);
             } catch (\Throwable $e) {
                 $this->app->logger()->warning('Password reset email failed', ['error' => $e->getMessage()]);
             }

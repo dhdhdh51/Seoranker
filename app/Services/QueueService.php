@@ -28,6 +28,7 @@ final class QueueService
         'scan_broken_links' => \BharatSeo\Jobs\ScanBrokenLinksJob::class,
         'check_backlink' => \BharatSeo\Jobs\CheckBacklinkJob::class,
         'generate_draft' => \BharatSeo\Jobs\GenerateDraftJob::class,
+        'site_audit' => \BharatSeo\Jobs\SiteAuditJob::class,
     ];
 
     private Database $db;

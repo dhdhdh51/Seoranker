@@ -16,12 +16,13 @@ final class SettingsService
     public const DEFINITIONS = [
         // General
         'app.timezone' => ['default' => 'Asia/Kolkata', 'type' => 'timezone', 'label' => 'Timezone'],
-        'app.agency_name' => ['default' => 'Bharat SEO', 'type' => 'string', 'label' => 'Agency name'],
+        'app.agency_name' => ['default' => 'NoidaRankers', 'type' => 'string', 'label' => 'Agency name'],
         // Modules (Super Admin can enable/disable individually)
         'module.discovery' => ['default' => true, 'type' => 'bool', 'label' => 'Opportunity discovery'],
         'module.outreach' => ['default' => true, 'type' => 'bool', 'label' => 'Outreach'],
         'module.monitoring' => ['default' => true, 'type' => 'bool', 'label' => 'Backlink monitoring'],
         'module.reports' => ['default' => true, 'type' => 'bool', 'label' => 'Reports & exports'],
+        'module.audit' => ['default' => true, 'type' => 'bool', 'label' => 'Site audit tool'],
         'module.search_api' => ['default' => false, 'type' => 'bool', 'label' => 'Search-provider API discovery'],
         'module.local_ai' => ['default' => false, 'type' => 'bool', 'label' => 'Local AI model drafting'],
         // Queue / cron
@@ -53,7 +54,7 @@ final class SettingsService
         'smtp.username' => ['default' => '', 'type' => 'string', 'label' => 'SMTP username'],
         'smtp.password' => ['default' => '', 'type' => 'secret', 'label' => 'SMTP password'],
         'smtp.from_email' => ['default' => '', 'type' => 'email', 'label' => 'From email'],
-        'smtp.from_name' => ['default' => 'Bharat SEO', 'type' => 'string', 'label' => 'From name'],
+        'smtp.from_name' => ['default' => 'NoidaRankers', 'type' => 'string', 'label' => 'From name'],
         'smtp.timeout' => ['default' => 15, 'type' => 'int', 'label' => 'SMTP timeout (s)', 'min' => 3, 'max' => 60],
         // Monitoring
         'monitor.interval_days' => ['default' => 7, 'type' => 'int', 'label' => 'Re-check active links every (days)', 'min' => 1, 'max' => 90],
@@ -79,6 +80,13 @@ final class SettingsService
         // Security
         'security.session_idle_minutes' => ['default' => 60, 'type' => 'int', 'label' => 'Session idle timeout (minutes)', 'min' => 5, 'max' => 1440],
         'security.upload_max_mb' => ['default' => 5, 'type' => 'int', 'label' => 'Max CSV upload size (MB)', 'min' => 1, 'max' => 50],
+        // Site audit
+        'audit.interval_ms' => ['default' => 1000, 'type' => 'int', 'label' => 'Delay between audit requests to your own site (ms)', 'min' => 500, 'max' => 10000],
+        // Website single sign-on (main company website admin)
+        'sso.website_enabled' => ['default' => false, 'type' => 'bool', 'label' => 'Allow signing in to the company website admin with this account'],
+        'sso.website_url' => ['default' => '', 'type' => 'url', 'label' => 'Company website URL (e.g. https://noidarankers.in)'],
+        'sso.secret' => ['default' => '', 'type' => 'secret', 'label' => 'Shared SSO secret (same value in the website config.php)'],
+        'sso.roles' => ['default' => 'staff', 'type' => 'choice', 'choices' => ['super_admin', 'staff'], 'label' => 'Who may sign in to the website admin (super_admin = admins only, staff = admins + SEO managers)'],
         // Cron
         'cron.expected_interval_minutes' => ['default' => 5, 'type' => 'int', 'label' => 'Expected cron interval (minutes)', 'min' => 1, 'max' => 1440],
     ];

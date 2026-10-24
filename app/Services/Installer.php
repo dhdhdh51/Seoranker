@@ -83,7 +83,7 @@ final class Installer
     {
         $storage ??= APP_ROOT . '/storage';
         if (self::isLocked($storage)) {
-            throw new \RuntimeException('Bharat SEO is already installed. The installer is locked.');
+            throw new \RuntimeException('NoidaRankers is already installed. The installer is locked.');
         }
         $problems = [];
         foreach (self::environmentChecks($storage) as $c) {
@@ -116,13 +116,13 @@ final class Installer
         $version = (string)$db->fetchColumn('SELECT VERSION()');
         if ((int)$db->fetchColumn("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'users'") > 0
             && (int)$db->fetchColumn('SELECT COUNT(*) FROM users') > 0) {
-            throw new \InvalidArgumentException('The database already contains a Bharat SEO installation. Use an empty database or follow UPGRADE.md.');
+            throw new \InvalidArgumentException('The database already contains a NoidaRankers installation. Use an empty database or follow UPGRADE.md.');
         }
         Migrator::runSchema($db, APP_ROOT . '/database/schema.sql');
 
         $key = Crypto::generateKey();
         $config = [
-            'app' => ['name' => 'Bharat SEO', 'url' => rtrim($in['app_url'], '/'), 'env' => 'production', 'debug' => false, 'timezone' => $in['timezone'], 'key' => $key, 'pretty_urls' => (bool)($in['pretty_urls'] ?? true), 'demo_mode' => false],
+            'app' => ['name' => 'NoidaRankers', 'url' => rtrim($in['app_url'], '/'), 'env' => 'production', 'debug' => false, 'timezone' => $in['timezone'], 'key' => $key, 'pretty_urls' => (bool)($in['pretty_urls'] ?? true), 'demo_mode' => false],
             'db' => $dbCfg,
             'paths' => ['storage' => $storage],
             'session' => ['name' => 'BSEOSESSID', 'idle_minutes' => 60, 'absolute_hours' => 12, 'secure_cookie' => 'auto'],

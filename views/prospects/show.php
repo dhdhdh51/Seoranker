@@ -118,7 +118,7 @@ $components = $assessment ? (json_decode((string)$assessment['components'], true
     <?php if ($canManage && in_array($p['category'], ['business_directory', 'local_citation', 'community_profile', 'industry_association'], true)): ?>
     <div class="card card-soft mb-3"><div class="card-body small">
       <h2 class="h6 text-uppercase text-body-secondary">Manual submission</h2>
-      <p>Directory, citation and profile sites are <strong>submitted by you</strong> on their official page. Bharat SEO never creates accounts, solves CAPTCHAs or bypasses verification.</p>
+      <p>Directory, citation and profile sites are <strong>submitted by you</strong> on their official page. <?= e(brand()) ?> never creates accounts, solves CAPTCHAs or bypasses verification.</p>
       <?php if ($p['submission_url']): ?><a class="btn btn-sm btn-outline-primary mb-2" href="<?= e($p['submission_url']) ?>" target="_blank" rel="noopener noreferrer nofollow"><i class="bi bi-box-arrow-up-right"></i> Open official submission page</a><?php else: ?><p class="text-body-secondary">No submission page recorded — add it under Details.</p><?php endif; ?>
       <?php if ($p['status'] === 'approved'): ?>
       <form method="post" action="<?= e(url('/prospects/' . $id . '/submitted')) ?>" class="row g-2">

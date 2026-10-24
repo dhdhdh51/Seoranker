@@ -213,7 +213,7 @@ final class HttpSmokeTest extends TestCase
             '/outreach', '/outreach/campaigns/new', '/outreach/campaigns/' . $i['campaignA'], '/outreach/messages/' . $i['messageA'], '/outreach/suppressions',
             '/approvals', '/backlinks', '/backlinks?project_id=' . $i['projectA'], '/backlinks/' . $i['backlinkA'], '/backlinks/history', '/backlinks/history?changes=1',
             '/reports', '/reports/project/' . $i['projectA'], '/notifications', '/users', '/users/new', '/users/' . $i['manager'] . '/edit', '/settings',
-            '/system/queue', '/system/queue?status=pending', '/system/audit', '/system/install', '/profile'];
+            '/system/queue', '/system/queue?status=pending', '/system/audit', '/system/install', '/profile', '/audits', '/audits?project_id=' . $i['projectA']];
         foreach ($paths as $p) {
             $this->assertCleanPage($this->http('GET', $p, 'admin'), $p);
         }

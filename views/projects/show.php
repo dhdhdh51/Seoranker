@@ -93,6 +93,55 @@ $id = (int)$p['id'];
     </div></div>
     <?php endif; ?>
 
+    <?php if ($currentUser->isSuperAdmin()): ?>
+    <div class="card card-soft mb-3" id="client-access"><div class="card-body">
+      <h2 class="h6 text-uppercase text-body-secondary">Client portal access</h2>
+      <p class="small text-body-secondary mb-2">People added here sign in to this platform and see only <strong><?= e($p['client_name']) ?></strong>’s projects. “Can approve” lets them approve outreach when the policy needs client approval.</p>
+      <ul class="list-unstyled small mb-2">
+        <?php foreach ($clientUsers as $cu): ?>
+          <li class="d-flex justify-content-between align-items-center border-bottom py-1">
+            <span><?= e($cu['name']) ?> <span class="text-body-secondary">&lt;<?= e($cu['email']) ?>&gt;</span> <?= $cu['can_approve'] ? badge('approved', 'approve') : '' ?> <?= $cu['can_export'] ? badge('info', 'export') : '' ?></span>
+            <form method="post" action="<?= e(url('/projects/' . $id . '/client-users/' . $cu['user_id'] . '/remove')) ?>" data-confirm="Remove this person's access?"><?= csrf_field() ?><button class="btn btn-sm btn-link text-danger p-0">Remove</button></form>
+          </li>
+        <?php endforeach; ?>
+        <?php if (!$clientUsers): ?><li class="text-body-secondary">No client users yet.</li><?php endif; ?>
+      </ul>
+      <ul class="nav nav-pills nav-sm small mb-2" role="tablist">
+        <li class="nav-item"><button class="nav-link active py-1" data-bs-toggle="tab" data-bs-target="#cu-new" type="button">New client user</button></li>
+        <?php if ($clientUserOptions): ?><li class="nav-item"><button class="nav-link py-1" data-bs-toggle="tab" data-bs-target="#cu-existing" type="button">Existing user</button></li><?php endif; ?>
+      </ul>
+      <div class="tab-content">
+        <form class="tab-pane fade show active row g-2" id="cu-new" method="post" action="<?= e(url('/projects/' . $id . '/client-users')) ?>" autocomplete="off">
+          <?= csrf_field() ?>
+          <div class="col-6"><input name="name" class="form-control form-control-sm" placeholder="Name" required maxlength="120"></div>
+          <div class="col-6"><input name="email" type="email" class="form-control form-control-sm" placeholder="Email" required maxlength="190"></div>
+          <div class="col-12"><input name="password" type="password" class="form-control form-control-sm" placeholder="Initial password (10+ chars, letters + number)" required minlength="10" autocomplete="new-password"></div>
+          <div class="col-6"><div class="form-check small"><input class="form-check-input" type="checkbox" name="can_approve" value="1" id="cua"><label class="form-check-label" for="cua">Can approve</label></div></div>
+          <div class="col-6"><div class="form-check small"><input class="form-check-input" type="checkbox" name="can_export" value="1" id="cue" checked><label class="form-check-label" for="cue">Can export</label></div></div>
+          <div class="col-12"><button class="btn btn-sm btn-primary">Create &amp; give access</button></div>
+        </form>
+        <?php if ($clientUserOptions): ?>
+        <form class="tab-pane fade row g-2" id="cu-existing" method="post" action="<?= e(url('/projects/' . $id . '/client-users')) ?>">
+          <?= csrf_field() ?>
+          <div class="col-12"><select name="user_id" class="form-select form-select-sm" required><option value="">Client-role user…</option><?php foreach ($clientUserOptions as $uid => $l): ?><option value="<?= (int)$uid ?>"><?= e($l) ?></option><?php endforeach; ?></select></div>
+          <div class="col-6"><div class="form-check small"><input class="form-check-input" type="checkbox" name="can_approve" value="1" id="cua2"><label class="form-check-label" for="cua2">Can approve</label></div></div>
+          <div class="col-6"><div class="form-check small"><input class="form-check-input" type="checkbox" name="can_export" value="1" id="cue2" checked><label class="form-check-label" for="cue2">Can export</label></div></div>
+          <div class="col-12"><button class="btn btn-sm btn-primary">Give access</button></div>
+        </form>
+        <?php endif; ?>
+      </div>
+    </div></div>
+    <?php endif; ?>
+
+    <div class="card card-soft mb-3"><div class="card-body d-flex justify-content-between align-items-center gap-2">
+      <div><h2 class="h6 text-uppercase text-body-secondary mb-1">Site audit</h2>
+        <div class="small"><?php if ($lastAudit): ?>Last: <?= $lastAudit['score'] !== null ? '<strong>' . (int)$lastAudit['score'] . '/100</strong>' : badge($lastAudit['status']) ?> · <?= e(fmt_dt($lastAudit['finished_at'])) ?><?php else: ?>No audit yet.<?php endif; ?></div></div>
+      <div class="d-flex gap-2">
+        <?php if ($lastAudit): ?><a class="btn btn-sm btn-outline-secondary" href="<?= e(url('/audits/' . $lastAudit['id'])) ?>">View</a><?php endif; ?>
+        <?php if ($canManage): ?><a class="btn btn-sm btn-primary" href="<?= e(url('/audits', ['project_id' => $id])) ?>"><i class="bi bi-clipboard2-pulse"></i> Run audit</a><?php endif; ?>
+      </div>
+    </div></div>
+
     <?php if ($currentUser->isStaff()): ?>
     <div class="card card-soft mb-3"><div class="card-body">
       <h2 class="h6 text-uppercase text-body-secondary">Team</h2>

@@ -85,6 +85,12 @@
     input.addEventListener('input', function () { out.textContent = input.value; });
   });
 
+  // Auto-refresh progress pages (e.g. running site audits)
+  $$('[data-autorefresh]').forEach(function (el) {
+    var secs = Math.max(5, parseInt(el.getAttribute('data-autorefresh'), 10) || 15);
+    setTimeout(function () { if (!document.hidden) { window.location.reload(); } }, secs * 1000);
+  });
+
   // Print
   $$('[data-print]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
 

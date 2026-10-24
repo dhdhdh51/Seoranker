@@ -38,7 +38,7 @@ abstract class Controller
         return View::render($template, $data + [
             'flash' => Session::pullFlash(),
             'errors' => $errors,
-            'title' => $data['title'] ?? 'Bharat SEO',
+            'title' => $data['title'] ?? brand(),
         ]);
     }
 

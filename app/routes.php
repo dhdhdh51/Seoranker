@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 use BharatSeo\Controllers\ApprovalController;
+use BharatSeo\Controllers\AuditController;
+use BharatSeo\Controllers\SsoController;
 use BharatSeo\Controllers\AuthController;
 use BharatSeo\Controllers\BacklinkController;
 use BharatSeo\Controllers\ClientController;
@@ -64,6 +66,8 @@ return static function (Router $r): void {
     $r->post('/projects/{id}/sitemap', [ProjectController::class, 'sitemap'], $staff);
     $r->post('/projects/{id}/members', [ProjectController::class, 'addMember'], $admin);
     $r->post('/projects/{id}/members/{uid}/remove', [ProjectController::class, 'removeMember'], $admin);
+    $r->post('/projects/{id}/client-users', [ProjectController::class, 'addClientUser'], $admin);
+    $r->post('/projects/{id}/client-users/{uid}/remove', [ProjectController::class, 'removeClientUser'], $admin);
     $r->post('/projects/{id}/settings', [ProjectController::class, 'settings'], $staff);
     $r->post('/projects/{id}/check-backlinks', [ProjectController::class, 'checkBacklinks'], $staff + ['module' => 'monitoring']);
 
@@ -125,6 +129,18 @@ return static function (Router $r): void {
     $r->get('/reports', [ReportController::class, 'index'], ['module' => 'reports']);
     $r->get('/reports/project/{id}', [ReportController::class, 'project'], ['module' => 'reports']);
     $r->get('/exports/{type}', [ReportController::class, 'export'], ['module' => 'reports']);
+
+    // Site audit
+    $au = ['module' => 'audit'];
+    $r->get('/audits', [AuditController::class, 'index'], $au);
+    $r->post('/audits', [AuditController::class, 'store'], $staff + $au);
+    $r->get('/audits/{id}', [AuditController::class, 'show'], $au);
+    $r->post('/audits/{id}/continue', [AuditController::class, 'crawlMore'], $staff + $au);
+    $r->post('/audits/{id}/cancel', [AuditController::class, 'cancel'], $staff + $au);
+    $r->get('/audits/{id}/export', [AuditController::class, 'export'], $au);
+
+    // Single sign-on to the company website admin
+    $r->get('/sso/website', [SsoController::class, 'website'], $staff);
 
     // Notifications
     $r->get('/notifications', [NotificationController::class, 'index']);

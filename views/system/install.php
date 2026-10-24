@@ -1,4 +1,4 @@
-<div class="page-head"><div><h1 class="h3 mb-0">Installation &amp; upgrade</h1><div class="small text-body-secondary">Bharat SEO v<?= e($version) ?> · Database <?= e($dbVersion) ?> · PHP <?= e(PHP_VERSION) ?></div></div></div>
+<div class="page-head"><div><h1 class="h3 mb-0">Installation &amp; upgrade</h1><div class="small text-body-secondary"><?= e(brand()) ?> v<?= e($version) ?> · Database <?= e($dbVersion) ?> · PHP <?= e(PHP_VERSION) ?></div></div></div>
 <div class="row g-3">
   <div class="col-xl-6">
     <div class="card card-soft mb-3"><div class="card-header bg-transparent fw-semibold">Security posture</div><ul class="list-group list-group-flush small">
