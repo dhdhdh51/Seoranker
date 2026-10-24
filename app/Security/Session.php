@@ -30,8 +30,11 @@ final class Session
         ini_set('session.use_only_cookies', '1');
         ini_set('session.use_trans_sid', '0');
         ini_set('session.cookie_httponly', '1');
-        ini_set('session.sid_length', '48');
-        ini_set('session.sid_bits_per_character', '6');
+        if (PHP_VERSION_ID < 80400) {
+            // Deprecated in PHP 8.4, whose defaults (32 chars, 4 bits) are already sufficient.
+            ini_set('session.sid_length', '48');
+            ini_set('session.sid_bits_per_character', '6');
+        }
         ini_set('session.gc_maxlifetime', (string)(self::absoluteSeconds($app)));
 
         session_name((string)$app->config->get('session.name', 'BSEOSESSID'));
