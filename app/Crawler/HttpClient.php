@@ -52,7 +52,8 @@ class HttpClient implements PageFetcher
         $maxBytes = (int)($options['max_bytes'] ?? $this->setting('crawler.max_bytes', 2_000_000));
         $maxRedirects = (int)$this->setting('crawler.max_redirects', 5);
         $retries = max(0, min(3, (int)$this->setting('crawler.retries', 2)));
-        $started = microtime(true);
+        // Network time only (excludes robots.txt lookups, rate-limit waits and retry sleeps).
+        $netSeconds = 0.0;
 
         $current = $url;
         $chain = [];
@@ -78,7 +79,9 @@ class HttpClient implements PageFetcher
 
             $attempt = 0;
             do {
+                $t0 = microtime(true);
                 $raw = $this->rawRequest($current, $check['host'], $check['port'], $check['ip'], $accept, $maxBytes);
+                $netSeconds += microtime(true) - $t0;
                 $temporary = $raw['error_type'] === HttpResponse::ERR_NETWORK || in_array($raw['status'], [429, 502, 503, 504], true);
                 if (!$temporary || $attempt >= $retries) {
                     break;
@@ -93,7 +96,7 @@ class HttpClient implements PageFetcher
             } while (true);
 
             if ($raw['error_type'] !== null) {
-                return new HttpResponse($url, $current, $raw['status'], $raw['headers'], '', $raw['error_type'], $raw['error'], $chain, (int)((microtime(true) - $started) * 1000));
+                return new HttpResponse($url, $current, $raw['status'], $raw['headers'], '', $raw['error_type'], $raw['error'], $chain, (int)round($netSeconds * 1000));
             }
             if ($raw['status'] >= 300 && $raw['status'] < 400 && !empty($raw['headers']['location'])) {
                 $next = Url::resolve($current, $raw['headers']['location']);
@@ -104,7 +107,7 @@ class HttpClient implements PageFetcher
                 $current = $next;
                 continue;
             }
-            return new HttpResponse($url, $current, $raw['status'], $raw['headers'], $raw['body'], null, null, $chain, (int)((microtime(true) - $started) * 1000), $raw['truncated']);
+            return new HttpResponse($url, $current, $raw['status'], $raw['headers'], $raw['body'], null, null, $chain, (int)round($netSeconds * 1000), $raw['truncated']);
         }
         return HttpResponse::failure($current, HttpResponse::ERR_REDIRECTS, 'Too many redirects.', $chain);
     }
