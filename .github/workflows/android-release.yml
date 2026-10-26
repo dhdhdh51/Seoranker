@@ -218,4 +218,5 @@ jobs:
 
       - name: Remove keystore
         if: always()
+        working-directory: .
         run: rm -f "${RUNNER_TEMP}/release.jks"
