@@ -8,6 +8,14 @@ APK="$1"; PKG="$2"; HOST="$3"; OUT="$4"
 mkdir -p "$OUT"
 adb wait-for-device
 adb install -r "$APK" || { echo "::error::adb install failed"; exit 1; }
+# Freshly booted emulators often have no network for a while — wait until the site's host resolves and answers.
+net=""
+for i in $(seq 1 30); do
+  if adb shell "ping -c 1 -W 2 $HOST" > /dev/null 2>&1; then net=yes; break; fi
+  sleep 4
+done
+[ -n "$net" ] || echo "::warning::Emulator network did not come up; continuing (ICMP may be blocked)"
+sleep 5
 adb logcat -c || true
 adb shell am start -W -n "$PKG/app.flatmates.android.MainActivity"
 ok=""
