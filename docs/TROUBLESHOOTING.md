@@ -11,3 +11,4 @@
 | QR code missing | It's only shown when a download or releases URL is configured. |
 | `/.well-known/assetlinks.json` returns 404 | Set the release certificate fingerprint in Admin → Settings → Android app. On Apache/LiteSpeed make sure the updated `public/.htaccess` (which allows that one dotfile path) is deployed. |
 | Android build or release problems | See the table at the end of [ANDROID.md](ANDROID.md). |
+| `/.well-known/assetlinks.json` is 403 on LiteSpeed/OpenLiteSpeed (aaPanel) | The web server blocks all dot-paths before `.htaccess` runs. App Links stay off (links open in the browser — everything else works). To enable them, add a `context /.well-known/` in the vhost config allowing that folder, or serve the file from a front proxy/CDN rule. |
