@@ -141,6 +141,7 @@ return static function (Router $r): void {
 
     // Single sign-on to the company website admin
     $r->get('/sso/website', [SsoController::class, 'website'], $staff);
+    $r->get('/sso/flatmates', [SsoController::class, 'flatmates'], $staff);
 
     // Notifications
     $r->get('/notifications', [NotificationController::class, 'index']);

@@ -22,4 +22,15 @@ final class SsoController extends Controller
         $target = $sso->websiteUrl() . '/admin/sso?token=' . rawurlencode($sso->tokenFor($this->user()));
         return new Response('', 303, ['Location' => $target, 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer']);
     }
+
+    /** Redirect staff to the Student Flatmate Finder admin with a one-time signed token. */
+    public function flatmates(): Response
+    {
+        $sso = $this->app->make(SsoService::class);
+        if (!$sso->flatmatesAllowed($this->user())) {
+            throw new HttpException(404);
+        }
+        $target = $sso->flatmatesUrl() . '/sso?token=' . rawurlencode($sso->flatmatesTokenFor($this->user()));
+        return new Response('', 303, ['Location' => $target, 'Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer']);
+    }
 }

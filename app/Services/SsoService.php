@@ -87,4 +87,34 @@ final class SsoService
         $this->app->make(AuditLogger::class)->log('sso.website_login', $user->id, null, ['website' => $payload['aud']]);
         return self::sign($payload, (string)$this->app->settings()->get('sso.secret'));
     }
+
+    /** Staff sign-in to the Student Flatmate Finder admin (separate app, separate secret). */
+    public function flatmatesEnabled(): bool
+    {
+        $s = $this->app->settings();
+        return $s->has('sso.flatmates_url') && strlen((string)$s->get('sso.flatmates_secret')) >= 32;
+    }
+
+    public function flatmatesAllowed(User $user): bool
+    {
+        return $this->flatmatesEnabled() && $user->status === 'active' && $user->isStaff();
+    }
+
+    public function flatmatesUrl(): string
+    {
+        return rtrim((string)$this->app->settings()->get('sso.flatmates_url'), '/');
+    }
+
+    public function flatmatesTokenFor(User $user): string
+    {
+        $now = time();
+        $payload = [
+            'iss' => (string)parse_url((string)$this->app->config->get('app.url'), PHP_URL_HOST),
+            'aud' => (string)parse_url($this->flatmatesUrl(), PHP_URL_HOST),
+            'sub' => $user->id, 'email' => $user->email, 'name' => $user->name, 'role' => $user->role,
+            'iat' => $now, 'exp' => $now + self::TTL, 'nonce' => bin2hex(random_bytes(16)),
+        ];
+        $this->app->make(AuditLogger::class)->log('sso.flatmates_login', $user->id, null, ['app' => $payload['aud']]);
+        return self::sign($payload, (string)$this->app->settings()->get('sso.flatmates_secret'));
+    }
 }

@@ -92,6 +92,9 @@ $isActive = static function (string $href) use ($path): bool {
             <?php if (app()->make(\BharatSeo\Services\SsoService::class)->allowed($u)): ?>
               <li><a class="dropdown-item" href="<?= e(url('/sso/website')) ?>"><i class="bi bi-globe me-2"></i>Open website admin</a></li>
             <?php endif; ?>
+            <?php if (app()->make(\BharatSeo\Services\SsoService::class)->flatmatesAllowed($u)): ?>
+              <li><a class="dropdown-item" href="<?= e(url('/sso/flatmates')) ?>"><i class="bi bi-house-heart me-2"></i>Open Flatmates admin</a></li>
+            <?php endif; ?>
             <li>
               <form method="post" action="<?= e(url('/logout')) ?>"><?= csrf_field() ?><button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button></form>
             </li>

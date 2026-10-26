@@ -22,7 +22,7 @@ final class SettingsController extends Controller
         'Discovery & search API (optional)' => ['search.provider', 'search.api_key', 'search.cse_id', 'search.searxng_url', 'search.daily_quota', 'discovery.max_results_per_query', 'discovery.public_page_max_links', 'discovery.blocklist', 'safebrowsing.api_key'],
         'Local AI model (optional)' => ['ai.endpoint', 'ai.model', 'ai.api_key', 'ai.timeout'],
         'Site audit' => ['audit.interval_ms'],
-        'Website single sign-on' => ['sso.website_enabled', 'sso.website_url', 'sso.secret', 'sso.roles'],
+        'Website single sign-on' => ['sso.website_enabled', 'sso.website_url', 'sso.secret', 'sso.roles', 'sso.flatmates_url', 'sso.flatmates_secret'],
         'Queue & cron' => ['queue.max_runtime_seconds', 'queue.max_jobs_per_run', 'queue.default_max_attempts', 'cron.expected_interval_minutes'],
         'Security' => ['security.session_idle_minutes', 'security.upload_max_mb'],
     ];

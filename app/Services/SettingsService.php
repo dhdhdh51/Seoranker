@@ -87,6 +87,8 @@ final class SettingsService
         'sso.website_url' => ['default' => '', 'type' => 'url', 'label' => 'Company website URL (e.g. https://noidarankers.in)'],
         'sso.secret' => ['default' => '', 'type' => 'secret', 'label' => 'Shared SSO secret (same value in the website config.php)'],
         'sso.roles' => ['default' => 'staff', 'type' => 'choice', 'choices' => ['super_admin', 'staff'], 'label' => 'Who may sign in to the website admin (super_admin = admins only, staff = admins + SEO managers)'],
+        'sso.flatmates_url' => ['default' => 'https://flatmates.noidarankers.in', 'type' => 'url', 'label' => 'Student Flatmate Finder URL'],
+        'sso.flatmates_secret' => ['default' => '', 'type' => 'secret', 'label' => 'Flatmates SSO secret (same value in Flatmates → Admin → Settings → NoidaRankers connection)'],
         // Cron
         'cron.expected_interval_minutes' => ['default' => 5, 'type' => 'int', 'label' => 'Expected cron interval (minutes)', 'min' => 1, 'max' => 1440],
     ];
