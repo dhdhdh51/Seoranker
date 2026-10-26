@@ -156,7 +156,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: bash android/scripts/device-smoke.sh apk/app-debug.apk in.noidarankers.flatmates.debug smoke
+          script: bash android/scripts/device-smoke.sh apk/app-debug.apk in.noidarankers.flatmates.debug flatmates.noidarankers.in smoke
 
       - name: Upload screenshot and logs
         if: always()

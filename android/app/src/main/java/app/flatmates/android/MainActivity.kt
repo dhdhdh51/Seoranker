@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Build
 import android.os.Environment
 import android.os.SystemClock
+import android.util.Log
 import android.view.View
 import android.webkit.CookieManager
 import android.webkit.SslErrorHandler
@@ -45,6 +46,10 @@ import androidx.webkit.WebViewFeature
  * native navigation, uploads, downloads and error handling. No JavaScript interface is exposed.
  */
 class MainActivity : ComponentActivity() {
+
+    private companion object {
+        const val TAG = "FlatmatesApp"
+    }
 
     private lateinit var webView: WebView
     private lateinit var progress: ProgressBar
@@ -220,10 +225,16 @@ class MainActivity : ComponentActivity() {
         override fun onPageFinished(view: WebView, url: String?) {
             progress.visibility = View.GONE
             if (failedUrl == null) firstPageLoaded = true
+            if (BuildConfig.DEBUG) {
+                // Debug builds only (used by the CI smoke test). Never logs query strings, cookies or form data.
+                val u = Uri.parse(url ?: "")
+                Log.i(TAG, "page_finished host=${u.host} path=${u.path} title=${view.title}")
+            }
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
             if (!request.isForMainFrame) return
+            if (BuildConfig.DEBUG) Log.w(TAG, "main_frame_error code=${error.errorCode} desc=${error.description}")
             failedUrl = request.url.toString()
             showError(offline = !isOnline())
         }
@@ -232,6 +243,7 @@ class MainActivity : ComponentActivity() {
         override fun onReceivedSslError(view: WebView, handler: SslErrorHandler, error: SslError) {
             // Never proceed on certificate problems.
             handler.cancel()
+            if (BuildConfig.DEBUG) Log.w(TAG, "ssl_error primary=${error.primaryError}")
             failedUrl = error.url
             showSslError()
         }
