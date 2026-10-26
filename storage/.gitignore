@@ -1,0 +1,6 @@
+logs/
+sessions/
+uploads/
+private/
+mail/
+installed.lock

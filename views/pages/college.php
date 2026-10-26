@@ -1,0 +1,10 @@
+<nav aria-label="breadcrumb" class="small"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(url('/cities')) ?>">Cities</a></li><li class="breadcrumb-item"><a href="<?= e(url('/flatmates/' . $co['city_slug'])) ?>"><?= e($co['city_name']) ?></a></li><li class="breadcrumb-item active" aria-current="page"><?= e($co['name']) ?></li></ol></nav>
+<header class="mb-4">
+  <h1 class="h2">Flatmates & rooms near <?= e($co['name']) ?></h1>
+  <p class="lead text-body-secondary">Students of <?= e($co['name']) ?> use <?= e(brand()) ?> to find compatible flatmates and rooms nearby in <?= e($co['city_name']) ?>. Match by budget, move-in date and lifestyle, then chat privately.</p>
+  <div class="d-flex flex-wrap gap-3 small"><span class="chip"><i class="bi bi-people"></i> <?= (int)$students ?> students from this college</span><?php if ($co['email_domain']): ?><span class="chip chip-ok"><i class="bi bi-patch-check"></i> Instant verification with @<?= e($co['email_domain']) ?></span><?php endif; ?></div>
+  <div class="d-flex gap-2 mt-3"><a class="btn btn-primary" href="<?= e(url('/register')) ?>">Match with <?= e($co['name']) ?> students</a><a class="btn btn-outline-primary" href="<?= e(url('/rooms', ['city_id' => $co['city_id'], 'college_id' => $co['id']])) ?>">Rooms near campus</a></div>
+</header>
+<?php if ($listings): ?><h2 class="h5">Listings near <?= e($co['name']) ?></h2><div class="row g-3"><?php foreach ($listings as $l): ?><div class="col-sm-6 col-lg-4"><?= \Flatmates\Http\View::partial('partials/listing_card', ['l' => $l]) ?></div><?php endforeach; ?></div>
+<?php elseif ($nearby): ?><h2 class="h5">Other listings in <?= e($co['city_name']) ?></h2><div class="row g-3"><?php foreach ($nearby as $l): ?><div class="col-sm-6 col-lg-4"><?= \Flatmates\Http\View::partial('partials/listing_card', ['l' => $l]) ?></div><?php endforeach; ?></div>
+<?php else: ?><p class="text-body-secondary">No listings near <?= e($co['name']) ?> yet — be the first to <a href="<?= e(url('/register')) ?>">post your vacant bed</a>.</p><?php endif; ?>

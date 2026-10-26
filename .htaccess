@@ -1,0 +1,6 @@
+# If the document root cannot be pointed at /public, forward everything there and deny the rest.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(app|config|storage|cron|bin|database|views|tests|vendor)(/|$) - [F,L]
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

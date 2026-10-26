@@ -1,0 +1,10 @@
+/config/config.php
+/vendor/
+/storage/logs/*
+/storage/sessions/*
+/storage/uploads/*
+/storage/private/*
+/storage/mail/*
+/storage/installed.lock
+!/storage/**/.htaccess
+release.zip

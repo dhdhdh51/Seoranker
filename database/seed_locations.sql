@@ -1,0 +1,41 @@
+-- Launch cities and well-known colleges (public information). Email domains are used only to
+-- recognise college email addresses during verification; admins can edit everything later.
+INSERT IGNORE INTO cities (id, name, slug, state) VALUES
+ (1,'Noida','noida','Uttar Pradesh'),
+ (2,'Greater Noida','greater-noida','Uttar Pradesh'),
+ (3,'Delhi','delhi','Delhi'),
+ (4,'Gurugram','gurugram','Haryana'),
+ (5,'Ghaziabad','ghaziabad','Uttar Pradesh'),
+ (6,'Bengaluru','bengaluru','Karnataka'),
+ (7,'Pune','pune','Maharashtra'),
+ (8,'Mumbai','mumbai','Maharashtra'),
+ (9,'Hyderabad','hyderabad','Telangana'),
+ (10,'Chennai','chennai','Tamil Nadu'),
+ (11,'Kolkata','kolkata','West Bengal'),
+ (12,'Jaipur','jaipur','Rajasthan');
+
+INSERT IGNORE INTO colleges (city_id, name, slug, email_domain) VALUES
+ (1,'Amity University, Noida','amity-university-noida','amity.edu'),
+ (1,'Jaypee Institute of Information Technology','jiit-noida','jiit.ac.in'),
+ (2,'Sharda University','sharda-university','sharda.ac.in'),
+ (2,'Galgotias University','galgotias-university','galgotiasuniversity.edu.in'),
+ (2,'Shiv Nadar University','shiv-nadar-university','snu.edu.in'),
+ (2,'Bennett University','bennett-university','bennett.edu.in'),
+ (3,'University of Delhi','university-of-delhi','du.ac.in'),
+ (3,'IIT Delhi','iit-delhi','iitd.ac.in'),
+ (3,'Delhi Technological University','dtu-delhi','dtu.ac.in'),
+ (3,'Jamia Millia Islamia','jamia-millia-islamia','jmi.ac.in'),
+ (3,'Guru Gobind Singh Indraprastha University','ggsipu-delhi','ipu.ac.in'),
+ (4,'The NorthCap University','northcap-university-gurugram','ncuindia.edu'),
+ (5,'KIET Group of Institutions','kiet-ghaziabad','kiet.edu'),
+ (6,'Christ University','christ-university','christuniversity.in'),
+ (6,'IISc Bengaluru','iisc-bengaluru','iisc.ac.in'),
+ (7,'Symbiosis International University','symbiosis-pune','siu.edu.in'),
+ (7,'Savitribai Phule Pune University','sppu-pune','unipune.ac.in'),
+ (8,'IIT Bombay','iit-bombay','iitb.ac.in'),
+ (8,'University of Mumbai','university-of-mumbai','mu.ac.in'),
+ (9,'University of Hyderabad','university-of-hyderabad','uohyd.ac.in'),
+ (10,'IIT Madras','iit-madras','iitm.ac.in'),
+ (10,'Anna University','anna-university','annauniv.edu'),
+ (11,'Jadavpur University','jadavpur-university','jadavpuruniversity.in'),
+ (12,'Manipal University Jaipur','manipal-university-jaipur','jaipur.manipal.edu');
