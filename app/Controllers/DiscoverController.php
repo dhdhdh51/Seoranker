@@ -57,6 +57,8 @@ final class DiscoverController extends Controller
                 'budget' => $c['budget_max'] ? ($c['budget_min'] ? inr($c['budget_min']) . '–' : 'up to ') . inr($c['budget_max']) : null,
                 'move_in' => $c['move_in_date'] ? fmt_date($c['move_in_date']) : null,
                 'bio' => $c['bio'], 'verified' => $c['verified'], 'score' => $c['score'], 'reasons' => $c['reasons'], 'conflicts' => $c['conflicts'],
+                'photo_sm' => media_url($c['photo_path'], 'sm'),
+                'badges' => array_map(static fn($k) => ['label' => \Flatmates\Services\TrustService::BADGES[$k]['label'], 'icon' => \Flatmates\Services\TrustService::BADGES[$k]['icon'], 'tone' => \Flatmates\Services\TrustService::BADGES[$k]['tone']], $c['badges'] ?? []),
                 'tags' => array_values(array_filter([
                     $c['sleep_schedule'] ? label('sleep_schedule', $c['sleep_schedule']) : null,
                     $c['cleanliness'] ? label('cleanliness', (string)$c['cleanliness']) : null,

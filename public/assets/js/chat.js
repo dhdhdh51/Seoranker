@@ -23,7 +23,7 @@
     wrap.dataset.id = m.id;
     var b = document.createElement('div');
     b.className = 'bubble' + (m.hidden ? ' removed' : '');
-    if (m.hidden) { var em = document.createElement('em'); em.textContent = 'Message removed by a moderator'; b.appendChild(em); } else { b.textContent = m.body; }
+    b.textContent = m.hidden ? 'Message removed by a moderator' : m.body;
     var meta = document.createElement('div');
     meta.className = 'meta';
     meta.textContent = m.at;
@@ -54,7 +54,7 @@
     if (document.hidden) { timer = setTimeout(poll, 15000); return; }
     sff.request(url + '?since=' + last).then(function (r) {
       if (r.messages && r.messages.length) { append(r.messages); delay = 3000; } else { delay = Math.min(delay + 2000, 15000); }
-      if (form && r.can_send === false) { form.replaceWith(Object.assign(document.createElement('div'), { className: 'p-3 border-top text-center small text-body-secondary', textContent: r.problem || 'You can no longer send messages here.' })); form = null; }
+      if (form && r.can_send === false) { form.replaceWith(Object.assign(document.createElement('div'), { className: 'chat-closed', textContent: r.problem || 'You can no longer send messages here.' })); form = null; }
     }).catch(function (e) { if (e.status === 404 || e.status === 401) { return; } delay = 15000; })
       .finally(function () { timer = setTimeout(poll, delay); });
   }
@@ -68,12 +68,12 @@
       e.preventDefault();
       var body = input.value.trim();
       if (!body) { return; }
-      var btn = form.querySelector('button'); btn.disabled = true;
+      var btn = form.querySelector('button'); btn.disabled = true; btn.setAttribute('aria-busy', 'true');
       sff.post(url, { body: body }).then(function (r) {
         input.value = ''; input.style.height = 'auto';
         append([r.message]); scrollDown(); delay = 3000; poll();
       }).catch(function (err) { sff.toast(err.message, 'danger'); })
-        .finally(function () { btn.disabled = false; input.focus(); });
+        .finally(function () { btn.disabled = false; btn.removeAttribute('aria-busy'); input.focus(); });
     });
   }
 

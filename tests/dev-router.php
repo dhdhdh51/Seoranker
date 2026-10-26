@@ -3,7 +3,7 @@
 //   php -S 127.0.0.1:8099 -t public tests/dev-router.php
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 // Mirror public/.htaccess: never serve hidden files.
-if (preg_match('#(^|/)\.#', $path)) {
+if (preg_match('#(^|/)\.#', $path) && $path !== '/.well-known/assetlinks.json') {
     http_response_code(403);
     exit('Forbidden');
 }

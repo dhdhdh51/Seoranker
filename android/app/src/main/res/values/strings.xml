@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Flatmate Finder</string>
+    <string name="offline_title">You\'re offline</string>
+    <string name="offline_message">Check your mobile data or Wi-Fi connection, then try again.</string>
+    <string name="error_title">Couldn\'t load the page</string>
+    <string name="error_message">The site didn\'t respond. It may be busy — please try again in a moment.</string>
+    <string name="ssl_title">Secure connection failed</string>
+    <string name="ssl_message">We couldn\'t verify the site\'s security certificate, so the page was not opened to protect your account. Check your network (public Wi-Fi login pages can cause this) and try again.</string>
+    <string name="retry">Try again</string>
+    <string name="choose_file">Choose a file</string>
+    <string name="no_file_picker">No app available to pick files.</string>
+    <string name="no_app_for_link">No app can open this link.</string>
+    <string name="downloading">Downloading %1$s…</string>
+    <string name="download_failed">The download couldn\'t start.</string>
+</resources>

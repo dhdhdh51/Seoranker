@@ -1,4 +1,4 @@
-<h1 class="h4 mb-1">Create your free account</h1>
+<h1 class="h3 mb-1">Create your free account</h1>
 <p class="text-body-secondary small mb-4">For college students aged <?= (int)$minAge ?>+. Your email and date of birth are never shown to other students.</p>
 <form method="post" action="<?= e(url('/register')) ?>" novalidate>
   <?= csrf_field() ?>

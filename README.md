@@ -1,6 +1,13 @@
 # Student Flatmate Finder
 
-Mobile-first web app where college students find compatible flatmates (swipe + mutual match + private chat) and flats, shared rooms and vacant beds near campus. Operated by **NoidaRankers** — live at `https://flatmates.noidarankers.in`.
+Mobile-first web app (plus an Android app) where college students find compatible flatmates (swipe + mutual match + private chat) and flats, shared rooms and vacant beds near campus. Operated by **NoidaRankers** — live at `https://flatmates.noidarankers.in`.
+
+| Part | Where | Docs |
+|---|---|---|
+| Website (PHP/MySQL, shared hosting) | repo root (`app/`, `public/`, `views/` …) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| Android app (Kotlin WebView shell) | `android/` | [docs/ANDROID.md](docs/ANDROID.md) |
+| Debug APK build | `.github/workflows/android-apk.yml` | artifact `student-flatmate-android-debug` |
+| Signed release + GitHub Release | `.github/workflows/android-release.yml` | tag `flatmates-android-vX.Y.Z` |
 
 **Stack:** PHP 8.2+ · MySQL 8 / MariaDB 10.5+ (PDO) · Bootstrap 5.3 · vanilla JS (AJAX polling). Runs on shared hosting / cPanel / aaPanel: no Node, Redis, Docker or WebSockets. Composer is optional — PHPMailer is used if `vendor/` exists, otherwise a built-in SMTP client.
 
@@ -14,6 +21,9 @@ Mobile-first web app where college students find compatible flatmates (swipe + m
 - **Verification:** college email OTP (admin-managed domain list per college) or document upload reviewed by a moderator — documents live outside the web root, every view is audited, and the file is deleted after the decision.
 - **Safety:** report (users, listings, messages) and block everywhere; serious reasons prioritised; repeated serious reports escalate; listings auto-hidden after N reports.
 - **Admin:** dashboard, reports, verifications, listings, users (restrict/suspend, roles & moderator permissions), cities & colleges, settings (branding, SEO, limits, maintenance, SMTP, NoidaRankers SSO), analytics, audit log, system health.
+- **Trust badges:** *Email Verified*, *College Email Verified*, *Student ID Reviewed*, *Listing Reviewed* — each shown only when backed by a real record, with an explanation of what it does and doesn't prove (Safety centre). "Listing Reviewed" is cleared whenever the owner edits the listing or its photos.
+- **Design system:** CSS design tokens (navy `#142B4A`, trust blue `#3478F6`, off-white `#F7F9FC`), dark mode, accessible focus states, responsive WebP photography (CC0, see [docs/CREDITS.md](docs/CREDITS.md)), loading/empty states and confirmation dialogs.
+- **Android app download:** `/app` page, home-page band and footer link driven by admin settings (URL, version, date, SHA-256), an optional QR code that encodes exactly the configured URL (built-in, dependency-free generator), and `/.well-known/assetlinks.json` for App Links. Nothing is shown as downloadable until a real release URL is configured.
 - **SEO:** city and college landing pages, listing pages with JSON-LD, sitemap.xml, robots.txt, canonical URLs.
 - **Privacy:** data export (JSON) and account deletion (7-day grace, then anonymised by cron).
 
@@ -29,6 +39,7 @@ Mobile-first web app where college students find compatible flatmates (swipe + m
    ```
    Config is written to `../flatmates-private/config.php` (outside the app) when possible.
 3. Delete `public/install.php`, add cron jobs ([docs/CRON.md](docs/CRON.md)), configure SMTP in **Admin → Settings → Email**.
+4. When updating an existing install, run `php bin/migrate.php`. Full guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 Nginx/LiteSpeed without `.htaccess`: route every non-file request to `public/index.php` and deny `/app`, `/config`, `/storage`, etc.
 
@@ -39,4 +50,10 @@ FM_TEST_DB_HOST=127.0.0.1 FM_TEST_DB_USER=... FM_TEST_DB_PASS=... php tests/run.
 ```
 The Http suite drives the whole app through PHP's built-in server. Test databases must contain "test" in their name (they are dropped).
 
-See also [docs/SECURITY.md](docs/SECURITY.md).
+Android: `cd android && ./gradlew testDebugUnitTest lintDebug assembleDebug`.
+
+See also [docs/SECURITY.md](docs/SECURITY.md), [docs/ANDROID.md](docs/ANDROID.md), [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+## Never commit
+
+Private config / `.env` files, database credentials or dumps, SMTP passwords, Android keystores (`*.jks`), verification documents, real student data or anything under `storage/`. These are covered by `.gitignore`; use the clearly-labelled demo data from tests only.

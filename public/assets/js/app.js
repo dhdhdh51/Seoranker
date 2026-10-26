@@ -38,7 +38,7 @@
 
   // Dark mode toggle
   document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
-    var sync = function () { var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark'; btn.innerHTML = dark ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>'; btn.setAttribute('aria-pressed', dark ? 'true' : 'false'); };
+    var sync = function () { var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark'; btn.innerHTML = dark ? '<i class="bi bi-sun" aria-hidden="true"></i>' : '<i class="bi bi-moon-stars" aria-hidden="true"></i>'; btn.setAttribute('aria-pressed', dark ? 'true' : 'false'); };
     sync();
     btn.addEventListener('click', function () {
       var next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
@@ -48,14 +48,53 @@
     });
   });
 
-  // Confirmation for destructive forms/buttons
+  // Accessible confirmation dialog for sensitive actions (falls back to window.confirm)
+  var confirmModal = null;
+  function askConfirm(message, okLabel, onOk) {
+    if (!window.bootstrap) { if (window.confirm(message)) { onOk(); } return; }
+    if (!confirmModal) {
+      var m = document.createElement('div');
+      m.className = 'modal fade'; m.tabIndex = -1; m.id = 'confirmModal';
+      m.setAttribute('aria-labelledby', 'confirmTitle'); m.setAttribute('aria-hidden', 'true');
+      m.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content p-2"><div class="modal-body">' +
+        '<h2 class="h5 mb-2" id="confirmTitle">Are you sure?</h2><p class="mb-0 text-body-secondary" data-msg></p></div>' +
+        '<div class="modal-footer border-0 pt-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-danger" data-ok>Confirm</button></div></div></div>';
+      document.body.appendChild(m);
+      confirmModal = m;
+    }
+    confirmModal.querySelector('[data-msg]').textContent = message;
+    var ok = confirmModal.querySelector('[data-ok]');
+    ok.textContent = okLabel || 'Confirm';
+    var inst = bootstrap.Modal.getOrCreateInstance(confirmModal);
+    var handler = function () { ok.removeEventListener('click', handler); inst.hide(); onOk(); };
+    ok.addEventListener('click', handler);
+    confirmModal.addEventListener('hidden.bs.modal', function () { ok.removeEventListener('click', handler); }, { once: true });
+    inst.show();
+  }
   document.addEventListener('submit', function (e) {
     var f = e.target.closest('form[data-confirm]');
-    if (f && !window.confirm(f.getAttribute('data-confirm'))) { e.preventDefault(); }
-  });
+    if (!f || f.dataset.confirmed === '1') { return; }
+    e.preventDefault();
+    askConfirm(f.getAttribute('data-confirm'), f.getAttribute('data-confirm-ok'), function () { f.dataset.confirmed = '1'; if (f.requestSubmit) { f.requestSubmit(); } else { f.submit(); } });
+  }, true);
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-confirm-click]');
-    if (b && !window.confirm(b.getAttribute('data-confirm-click'))) { e.preventDefault(); }
+    if (!b || b.dataset.confirmed === '1') { return; }
+    e.preventDefault();
+    askConfirm(b.getAttribute('data-confirm-click'), b.getAttribute('data-confirm-ok'), function () { b.dataset.confirmed = '1'; b.click(); });
+  }, true);
+
+  // Loading feedback on normal form submits (prevents double submits)
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (e.defaultPrevented || f.method.toLowerCase() !== 'post' || f.id === 'chatForm') { return; }
+    var btn = e.submitter || f.querySelector('button[type="submit"], button:not([type])');
+    if (!btn || btn.getAttribute('aria-busy') === 'true') { return; }
+    setTimeout(function () {
+      btn.setAttribute('aria-busy', 'true');
+      var sp = document.createElement('span'); sp.className = 'spinner-border'; sp.setAttribute('aria-hidden', 'true');
+      btn.prepend(sp);
+    }, 0);
   });
 
   // City → college dependent selects (filter options by data-city)

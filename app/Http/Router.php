@@ -19,7 +19,7 @@ final class Router
         'city' => '[a-z0-9][a-z0-9-]{1,119}',
         'college' => '[a-z0-9][a-z0-9-]{1,199}',
         'dir' => 'photos|listings',
-        'file' => '[a-f0-9]{32}\.jpg',
+        'file' => '[a-f0-9]{32}(?:-sm)?\.jpg',
     ];
 
     public function get(string $path, array $handler, array $options = []): void

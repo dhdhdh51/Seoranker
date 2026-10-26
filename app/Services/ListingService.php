@@ -130,6 +130,8 @@ final class ListingService
         $l = $this->ownListing($u, $id);
         $data = $this->validate($in);
         $review = $this->app->settings()->bool('rules.listing_review');
+        $data['reviewed_at'] = null; // a moderator review only covers the version they saw
+        $data['reviewed_by'] = null;
         if ($l['status'] === 'published' && $review) {
             $data['status'] = 'pending'; // edits are re-checked before going live again
         }
@@ -198,8 +200,11 @@ final class ListingService
             $count++;
             $added++;
         }
-        if ($added && $this->app->settings()->bool('rules.listing_review') && $db->fetchColumn("SELECT status FROM listings WHERE id = ?", [$id]) === 'published') {
-            $db->update('listings', ['status' => 'pending'], 'id = ?', [$id]);
+        if ($added) {
+            $db->update('listings', ['reviewed_at' => null, 'reviewed_by' => null], 'id = ?', [$id]);
+            if ($this->app->settings()->bool('rules.listing_review') && $db->fetchColumn('SELECT status FROM listings WHERE id = ?', [$id]) === 'published') {
+                $db->update('listings', ['status' => 'pending'], 'id = ?', [$id]);
+            }
         }
         return $added;
     }
@@ -274,8 +279,8 @@ final class ListingService
         }
         if (!empty($f['q'])) {
             $q = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], mb_substr(trim((string)$f['q']), 0, 80)) . '%';
-            $where[] = '(l.title LIKE ? OR l.locality LIKE ?)';
-            array_push($params, $q, $q);
+            $where[] = '(l.title LIKE ? OR l.locality LIKE ? OR co.name LIKE ?)';
+            array_push($params, $q, $q, $q);
         }
         $order = match ($f['sort'] ?? 'newest') {
             'rent_asc' => 'l.rent ASC, l.id DESC',
@@ -284,15 +289,15 @@ final class ListingService
         };
         $sqlWhere = implode(' AND ', $where);
         $db = $this->app->db();
-        $total = (int)$db->fetchColumn("SELECT COUNT(*) FROM listings l JOIN users u ON u.id = l.user_id WHERE $sqlWhere", $params);
+        $total = (int)$db->fetchColumn("SELECT COUNT(*) FROM listings l JOIN users u ON u.id = l.user_id LEFT JOIN colleges co ON co.id = l.near_college_id WHERE $sqlWhere", $params);
         $page = max(1, $page);
-        $rows = $db->fetchAll("SELECT l.id, l.type, l.title, l.slug, l.locality, l.rent, l.deposit, l.available_from, l.furnishing, l.gender_pref, l.beds_available, l.amenities, l.published_at,
+        $rows = $db->fetchAll("SELECT l.id, l.user_id, l.type, l.title, l.slug, l.status, l.locality, l.rent, l.deposit, l.available_from, l.furnishing, l.gender_pref, l.beds_available, l.amenities, l.published_at, l.reviewed_at,
                 c.name AS city_name, c.slug AS city_slug, co.name AS college_name,
                 (SELECT path FROM listing_photos p WHERE p.listing_id = l.id ORDER BY sort, id LIMIT 1) AS cover,
                 EXISTS (SELECT 1 FROM verifications v WHERE v.user_id = l.user_id AND v.status = 'approved') AS owner_verified
             FROM listings l JOIN users u ON u.id = l.user_id JOIN cities c ON c.id = l.city_id LEFT JOIN colleges co ON co.id = l.near_college_id
             WHERE $sqlWhere ORDER BY $order LIMIT " . (int)$perPage . ' OFFSET ' . (($page - 1) * (int)$perPage), $params);
-        return ['rows' => $rows, 'total' => $total];
+        return ['rows' => $this->withBadges($rows), 'total' => $total];
     }
 
     /**
@@ -330,6 +335,8 @@ final class ListingService
             $l['address_private'] = null;
         }
         $l['is_owner'] = $isOwner;
+        $l['badges'] = TrustService::forListing($l);
+        $l['owner_badges'] = $this->app->make(TrustService::class)->forUser((int)$l['user_id']);
         $l['photos'] = $this->photos((int)$l['id']);
         $l['amenity_list'] = array_values(array_filter(explode(',', (string)$l['amenities'])));
         return $l;
@@ -349,9 +356,9 @@ final class ListingService
         $note = mb_substr(trim($note), 0, 500) ?: null;
         $db = $this->app->db();
         match ($action) {
-            'approve' => $db->run("UPDATE listings SET status = 'published', moderation_note = NULL, published_at = COALESCE(published_at, UTC_TIMESTAMP()) WHERE id = ?", [$id]),
-            'reject' => $db->update('listings', ['status' => 'rejected', 'moderation_note' => $note ?? 'Please review our listing guidelines.'], 'id = ?', [$id]),
-            'hide' => $db->update('listings', ['status' => 'hidden', 'moderation_note' => $note ?? 'Hidden by a moderator.'], 'id = ?', [$id]),
+            'approve' => $db->run("UPDATE listings SET status = 'published', moderation_note = NULL, reviewed_at = UTC_TIMESTAMP(), reviewed_by = ?, published_at = COALESCE(published_at, UTC_TIMESTAMP()) WHERE id = ?", [$staff->id, $id]),
+            'reject' => $db->update('listings', ['status' => 'rejected', 'reviewed_at' => null, 'moderation_note' => $note ?? 'Please review our listing guidelines.'], 'id = ?', [$id]),
+            'hide' => $db->update('listings', ['status' => 'hidden', 'reviewed_at' => null, 'moderation_note' => $note ?? 'Hidden by a moderator.'], 'id = ?', [$id]),
             default => throw ValidationException::single('action', 'Unknown action.'),
         };
         $msg = match ($action) {
@@ -420,16 +427,28 @@ final class ListingService
     public function saved(User $u): array
     {
         $db = $this->app->db();
-        $listings = $db->fetchAll("SELECT l.id, l.title, l.slug, l.rent, l.locality, l.type, l.status, c.name AS city_name,
+        $listings = $db->fetchAll("SELECT l.id, l.user_id, l.title, l.slug, l.rent, l.deposit, l.available_from, l.amenities, l.gender_pref, l.reviewed_at, l.locality, l.type, l.status, c.name AS city_name,
                 (SELECT path FROM listing_photos p WHERE p.listing_id = l.id ORDER BY sort, id LIMIT 1) AS cover
             FROM saved_items s JOIN listings l ON l.id = s.item_id JOIN cities c ON c.id = l.city_id
             WHERE s.user_id = ? AND s.item_type = 'listing' AND l.status = 'published' ORDER BY s.created_at DESC", [$u->id]);
+        $listings = $this->withBadges($listings);
         $profiles = $db->fetchAll("SELECT p.user_id, p.display_name, p.photo_path, p.budget_max, co.name AS college_name
             FROM saved_items s JOIN profiles p ON p.user_id = s.item_id JOIN users u ON u.id = p.user_id LEFT JOIN colleges co ON co.id = p.college_id
             WHERE s.user_id = ? AND s.item_type = 'profile' AND u.status = 'active' AND p.discoverable = 1
               AND NOT EXISTS (SELECT 1 FROM blocks b WHERE (b.blocker_id = ? AND b.blocked_id = p.user_id) OR (b.blocker_id = p.user_id AND b.blocked_id = ?))
             ORDER BY s.created_at DESC", [$u->id, $u->id, $u->id]);
         return ['listings' => $listings, 'profiles' => $profiles];
+    }
+
+    /** Attach listing + owner trust badges to listing rows (one query for all owners). */
+    public function withBadges(array $rows): array
+    {
+        $owners = $this->app->make(TrustService::class)->forUsers(array_column($rows, 'user_id'));
+        foreach ($rows as &$r) {
+            $r['badges'] = TrustService::forListing($r);
+            $r['owner_badges'] = $owners[(int)($r['user_id'] ?? 0)] ?? [];
+        }
+        return $rows;
     }
 
     /** Normalise a multi-file $_FILES entry into a list of single-file arrays. */

@@ -75,6 +75,7 @@ final class Kernel
             throw new HttpException($match['allowed'] ? 405 : 404);
         }
         $route = $match['route'];
+        View::share('inApp', \Flatmates\Services\AppRelease::isInApp($request->userAgent()));
         $opts = $route['options'] + ['perm' => null, 'verified' => true, 'onboarded' => false, 'session' => true];
 
         if ($opts['session']) {

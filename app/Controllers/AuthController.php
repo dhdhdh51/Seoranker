@@ -33,7 +33,7 @@ final class AuthController extends Controller
         if (is_string($intended) && str_starts_with($intended, '/') && !str_starts_with($intended, '//') && !str_starts_with($intended, '/api/')) {
             return $this->redirect($intended);
         }
-        return $this->redirect('/discover');
+        return $this->redirect('/dashboard');
     }
 
     public function registerForm(): Response

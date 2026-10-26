@@ -8,3 +8,27 @@
 /storage/installed.lock
 !/storage/**/.htaccess
 release.zip
+
+# Android
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/.idea/
+/android/captures/
+*.iml
+# Signing material must NEVER be committed
+*.jks
+*.keystore
+*.p12
+*.pem
+keystore.properties
+signing.properties
+# Secrets / local env
+.env
+.env.*
+!.env.example
+# Database dumps and private data
+*.sql.gz
+*.dump
+/storage/backups/

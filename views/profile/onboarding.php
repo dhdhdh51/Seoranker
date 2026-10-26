@@ -21,14 +21,14 @@ $pct = (int)round(($step - 1) / 4 * 100);
     <h1 class="h4 mb-0"><?= $editing ? 'Edit profile' : 'Set up your profile' ?></h1>
     <span class="small text-body-secondary">Step <?= (int)$step ?> of 4</span>
   </div>
-  <div class="progress mb-3" role="progressbar" aria-label="Profile progress" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100" style="height:6px"><div class="progress-bar" style="width:<?= max(5, $pct) ?>%"></div></div>
-  <ul class="nav nav-pills nav-fill small mb-4 step-pills">
-    <?php foreach (ProfileService::STEPS as $n => $name): $reach = $editing || $n <= max(1, (int)$p['onboarding_step']); ?>
-      <li class="nav-item"><a class="nav-link<?= $n === $step ? ' active' : '' ?><?= $reach ? '' : ' disabled' ?>" href="<?= e(url('/onboarding/' . $n)) ?>"><?= e($name) ?></a></li>
+  <nav class="stepper" aria-label="Profile steps">
+    <?php foreach (ProfileService::STEPS as $n => $name): $reach = $editing || $n <= max(1, (int)$p['onboarding_step']); $cls = $n === $step ? 'current' : ($n < $step || ($editing && $n < $step) ? 'done' : ''); ?>
+      <?php if ($reach): ?><a class="<?= $cls ?>" href="<?= e(url('/onboarding/' . $n)) ?>"<?= $n === $step ? ' aria-current="step"' : '' ?>><span class="bar"></span><span class="lbl"><?= e($name) ?></span></a>
+      <?php else: ?><span class="<?= $cls ?>"><span class="bar"></span><span class="lbl"><?= e($name) ?></span></span><?php endif; ?>
     <?php endforeach; ?>
-  </ul>
+  </nav>
 
-  <form method="post" action="<?= e(url('/onboarding/' . $step)) ?>" enctype="multipart/form-data" class="card card-body shadow-sm border-0">
+  <form method="post" action="<?= e(url('/onboarding/' . $step)) ?>" enctype="multipart/form-data" class="surface p-4">
     <?= csrf_field() ?>
     <?php if ($step === 1): ?>
       <div class="mb-3"><label class="form-label" for="display_name">First name or nickname</label>

@@ -13,28 +13,34 @@
   var exhausted = false;
   var seen = {};
 
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) { n.className = cls; } if (text) { n.textContent = text; } return n; }
+
   function build(c) {
     var node = tpl.content.firstElementChild.cloneNode(true);
     node.dataset.id = c.id;
     var img = node.querySelector('img');
     var ini = node.querySelector('.swipe-initials');
-    if (c.photo) { img.src = c.photo; img.hidden = false; ini.hidden = true; } else { ini.textContent = c.initials; }
-    node.querySelector('.score-badge b').textContent = c.score;
-    var set = function (f, v) { var el = node.querySelector('[data-f="' + f + '"]'); if (!el) { return; } if (v) { el.textContent = v; } else { el.hidden = true; } };
-    set('name', c.name);
-    set('age', c.age ? ', ' + c.age : '');
-    node.querySelector('[data-f="verified"]').hidden = !c.verified;
-    set('college', [c.college, c.course, c.locality].filter(Boolean).join(' · '));
-    set('status', c.status);
+    if (c.photo) { img.src = c.photo; img.hidden = false; ini.hidden = true; img.decoding = 'async'; } else { ini.textContent = c.initials; }
+    var set = function (f, v) { var x = node.querySelector('[data-f="' + f + '"]'); if (x) { x.textContent = v || '—'; } };
+    node.querySelector('[data-f="score"]').textContent = c.score + '%';
+    node.querySelector('[data-f="name"]').textContent = c.name;
+    node.querySelector('[data-f="age"]').textContent = c.age ? ', ' + c.age : '';
+    var sub = [c.college, c.course].filter(Boolean).join(' · ');
+    node.querySelector('[data-f="college"]').textContent = sub || 'College not shared';
     set('budget', c.budget ? c.budget + '/mo' : '');
-    set('move_in', c.move_in ? 'Move-in ' + c.move_in : '');
-    set('bio', c.bio);
+    set('move_in', c.move_in);
+    set('locality', c.locality);
+    set('status', c.status);
+    var bio = node.querySelector('[data-f="bio"]'); if (c.bio) { bio.textContent = c.bio; } else { bio.remove(); }
+    var bw = node.querySelector('[data-f="badges"]');
+    (c.badges || []).forEach(function (b) { var s = el('span', 'tbadge tbadge-' + b.tone); s.appendChild(el('i', 'bi bi-' + b.icon)); s.appendChild(document.createTextNode(b.label)); bw.appendChild(s); });
+    if (!bw.children.length) { bw.remove(); }
     var reasons = node.querySelector('[data-f="reasons"]');
-    (c.reasons || []).forEach(function (r) { var s = document.createElement('span'); s.className = 'chip chip-ok'; s.textContent = '✓ ' + r; reasons.appendChild(s); });
-    (c.conflicts || []).forEach(function (r) { var s = document.createElement('span'); s.className = 'chip chip-warn'; s.textContent = '! ' + r; reasons.appendChild(s); });
+    (c.reasons || []).forEach(function (r) { reasons.appendChild(el('span', 'chip chip-ok', '✓ ' + r)); });
+    (c.conflicts || []).forEach(function (r) { reasons.appendChild(el('span', 'chip chip-warn', '! ' + r)); });
     var tags = node.querySelector('[data-f="tags"]');
-    (c.tags || []).forEach(function (t) { var s = document.createElement('span'); s.className = 'chip'; s.textContent = t; tags.appendChild(s); });
-    node.setAttribute('aria-label', c.name + ', ' + c.score + '% match');
+    (c.tags || []).forEach(function (t) { tags.appendChild(el('span', 'chip', t)); });
+    node.setAttribute('aria-label', c.name + ', ' + c.score + '% compatible' + ((c.badges || []).length ? ', ' + c.badges.map(function (b) { return b.label; }).join(', ') : ''));
     attachDrag(node);
     return node;
   }
@@ -76,6 +82,7 @@
     sff.post(deck.dataset.swipeUrl, { target_id: card.dataset.id, action: action }).then(function (r) {
       if (remainingEl && typeof r.remaining === 'number') { remainingEl.textContent = r.remaining; }
       if (r.matched) { showMatch(card.querySelector('[data-f="name"]').textContent, r.chat_url); }
+      var next = topCard(); if (next) { next.focus({ preventScroll: true }); }
     }).catch(function (e) {
       card.classList.remove('gone', 'fly-right', 'fly-left'); card.style.transform = '';
       sff.toast(e.message, 'warning');

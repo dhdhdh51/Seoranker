@@ -24,7 +24,7 @@ final class PageController extends Controller
     public function home(): Response
     {
         if ($this->currentUser) {
-            return $this->redirect($this->currentUser->isStaff() ? '/admin' : '/discover');
+            return $this->redirect($this->currentUser->isStaff() ? '/admin' : '/dashboard');
         }
         $db = $this->app->db();
         $cities = $db->fetchAll("SELECT c.*, (SELECT COUNT(*) FROM listings l WHERE l.city_id = c.id AND l.status = 'published' AND l.visibility = 'public') AS listings FROM cities c WHERE c.active = 1 ORDER BY c.name");
@@ -33,6 +33,7 @@ final class PageController extends Controller
             'title' => (string)$this->app->settings()->get('seo.home_title'),
             'description' => (string)$this->app->settings()->get('seo.home_description'),
             'canonical' => absolute_url('/'), 'cities' => $cities, 'latest' => $latest, 'bodyClass' => 'home',
+            'rel' => $this->app->make(\Flatmates\Services\AppRelease::class), 'preloadImage' => asset('img/photos/friends-960.webp'),
         ]);
     }
 

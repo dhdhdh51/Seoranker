@@ -4,7 +4,9 @@ declare(strict_types=1);
 use Flatmates\Controllers\AccountController;
 use Flatmates\Controllers\Admin\AdminController;
 use Flatmates\Controllers\AuthController;
+use Flatmates\Controllers\AppController;
 use Flatmates\Controllers\ChatController;
+use Flatmates\Controllers\DashboardController;
 use Flatmates\Controllers\DiscoverController;
 use Flatmates\Controllers\ListingController;
 use Flatmates\Controllers\MediaController;
@@ -33,6 +35,9 @@ return static function (Router $r): void {
     $r->get('/sitemap.xml', [PageController::class, 'sitemap'], $guest + ['session' => false]);
     $r->get('/robots.txt', [PageController::class, 'robots'], $guest + ['session' => false]);
     $r->get('/media/{dir}/{file}', [MediaController::class, 'show'], $guest);
+    $r->get('/app', [AppController::class, 'show'], $guest);
+    $r->get('/app/qr.svg', [AppController::class, 'qr'], $guest + ['session' => false]);
+    $r->get('/.well-known/assetlinks.json', [AppController::class, 'assetLinks'], $guest + ['session' => false]);
 
     // Authentication
     $r->get('/register', [AuthController::class, 'registerForm'], $guest);
@@ -75,6 +80,8 @@ return static function (Router $r): void {
     $r->get('/profile', [ProfileController::class, 'me'], $student);
     $r->get('/profile/{id}', [ProfileController::class, 'show'], $member);
     $r->get('/colleges.json', [ProfileController::class, 'colleges'], $guest);
+
+    $r->get('/dashboard', [DashboardController::class, 'index'], $student);
 
     // Discovery, matches, chat
     $r->get('/discover', [DiscoverController::class, 'index'], $student);

@@ -7,7 +7,7 @@
 <div class="discover">
   <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
     <div>
-      <h1 class="h5 mb-0">Flatmates in <?= e($me['city_name'] ?? '') ?></h1>
+      <h1 class="h4 mb-0">Flatmates in <?= e($me['city_name'] ?? '') ?></h1>
       <div class="small text-body-secondary"><span data-remaining><?= (int)$remaining ?></span> swipes left today<?= $pendingLikes ? ' · <i class="bi bi-heart-fill text-danger"></i> ' . (int)$pendingLikes . ' people liked you' : '' ?></div>
     </div>
     <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="filters"><i class="bi bi-sliders"></i> Filters<?= $filters ? ' (' . count($filters) . ')' : '' ?></button>
@@ -32,21 +32,18 @@
   </form>
 
   <div class="deck-wrap">
-    <div class="deck" id="deck" data-deck-url="<?= e(url('/api/deck', array_map('strval', $filters))) ?>" data-swipe-url="<?= e(url('/api/swipe')) ?>" aria-live="polite">
-      <div class="deck-empty text-center p-4" hidden>
-        <i class="bi bi-emoji-smile display-5 text-body-secondary"></i>
-        <h2 class="h5 mt-2">That's everyone for now</h2>
-        <p class="small text-body-secondary">New students join every day. Try widening your filters, or browse rooms meanwhile.</p>
-        <a class="btn btn-outline-primary btn-sm" href="<?= e(url('/rooms', ['city_id' => $me['city_id']])) ?>">Browse rooms</a>
+    <div class="deck" id="deck" data-deck-url="<?= e(url('/api/deck', array_map('strval', $filters))) ?>" data-swipe-url="<?= e(url('/api/swipe')) ?>" aria-live="polite" aria-label="Student profiles">
+      <div class="deck-empty surface" hidden>
+        <?= \Flatmates\Http\View::partial('partials/empty', ['icon' => 'emoji-smile', 'title' => "That's everyone for now", 'text' => 'New students join every week. Widen your filters, or browse rooms in the meantime.', 'cta' => ['Browse rooms', '/rooms?city_id=' . (int)$me['city_id']]]) ?>
       </div>
-      <div class="deck-loading text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div></div>
+      <div class="deck-loading" aria-label="Loading profiles"><div class="skeleton"></div></div>
     </div>
-    <div class="deck-actions">
-      <button class="btn btn-pass" type="button" data-action="pass" aria-label="Pass (left arrow)"><i class="bi bi-x-lg"></i></button>
-      <button class="btn btn-info-card" type="button" data-action="info" aria-label="View full profile"><i class="bi bi-info-lg"></i></button>
-      <button class="btn btn-like" type="button" data-action="like" aria-label="Like (right arrow)"><i class="bi bi-heart-fill"></i></button>
+    <div class="deck-actions" role="group" aria-label="Decide on this profile">
+      <div class="text-center"><button class="btn btn-pass" type="button" data-action="pass" aria-label="Pass (left arrow key)"><i class="bi bi-x-lg" aria-hidden="true"></i></button><div class="act-label">Pass</div></div>
+      <div class="text-center"><button class="btn btn-info-card" type="button" data-action="info" aria-label="View full profile (up arrow key)"><i class="bi bi-person-lines-fill" aria-hidden="true"></i></button><div class="act-label">Profile</div></div>
+      <div class="text-center"><button class="btn btn-like" type="button" data-action="like" aria-label="Like (right arrow key)"><i class="bi bi-heart-fill" aria-hidden="true"></i></button><div class="act-label">Like</div></div>
     </div>
-    <p class="text-center small text-body-secondary d-none d-md-block mt-2">Tip: use ← and → keys</p>
+    <p class="text-center small text-body-secondary d-none d-md-block mt-3 mb-0">Keyboard: ← pass · → like · ↑ open profile</p>
   </div>
 </div>
 
@@ -58,15 +55,21 @@
 <template id="cardTpl">
   <article class="swipe-card" tabindex="-1">
     <div class="swipe-photo"><img alt="" hidden><span class="swipe-initials"></span>
-      <span class="stamp stamp-like">LIKE</span><span class="stamp stamp-pass">NOPE</span>
-      <span class="score-badge"><b></b>% match</span></div>
+      <span class="stamp stamp-like" aria-hidden="true">LIKE</span><span class="stamp stamp-pass" aria-hidden="true">PASS</span>
+      <span class="score-badge"><b data-f="score"></b> compatible</span>
+    </div>
     <div class="swipe-body">
-      <h2 class="h4 mb-0"><span data-f="name"></span><span data-f="age"></span> <i class="bi bi-patch-check-fill text-primary" data-f="verified" hidden title="Verified student"></i></h2>
-      <div class="small text-body-secondary" data-f="college"></div>
-      <div class="d-flex flex-wrap gap-2 my-2 small"><span class="chip" data-f="status"></span><span class="chip" data-f="budget"></span><span class="chip" data-f="move_in"></span></div>
-      <p class="small mb-2 bio" data-f="bio"></p>
-      <div class="d-flex flex-wrap gap-1 small" data-f="reasons"></div>
-      <div class="d-flex flex-wrap gap-1 small mt-1" data-f="tags"></div>
+      <div><h2 class="swipe-name"><span data-f="name"></span><span data-f="age"></span></h2><div class="swipe-sub" data-f="college"></div></div>
+      <div class="tbadges" data-f="badges"></div>
+      <div class="swipe-facts">
+        <div class="swipe-fact"><small>Budget</small><span data-f="budget"></span></div>
+        <div class="swipe-fact"><small>Move-in</small><span data-f="move_in"></span></div>
+        <div class="swipe-fact"><small>Area</small><span data-f="locality"></span></div>
+        <div class="swipe-fact"><small>Looking for</small><span data-f="status"></span></div>
+      </div>
+      <p class="small bio" data-f="bio"></p>
+      <div class="d-flex flex-wrap gap-1" data-f="reasons"></div>
+      <div class="d-flex flex-wrap gap-1" data-f="tags"></div>
     </div>
   </article>
 </template>
