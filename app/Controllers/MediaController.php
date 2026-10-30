@@ -14,7 +14,8 @@ final class MediaController extends Controller
 {
     public function show(string $dir, string $file): Response
     {
-        $rel = $dir . '/' . $file;
+        $small = str_ends_with($file, '-sm.jpg');
+        $rel = $dir . '/' . ($small ? substr($file, 0, -7) . '.jpg' : $file); // access is checked on the original
         $db = $this->app->db();
         $u = $this->currentUser;
         if ($dir === 'photos') {
@@ -39,6 +40,9 @@ final class MediaController extends Controller
             }
         }
         $path = $this->app->config->storagePath('uploads/' . $rel);
+        if ($small && is_file(substr($path, 0, -4) . '-sm.jpg')) {
+            $path = substr($path, 0, -4) . '-sm.jpg';
+        }
         if (!is_file($path)) {
             throw new HttpException(404);
         }

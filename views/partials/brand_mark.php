@@ -1,0 +1,1 @@
+<svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" rx="11" fill="var(--brand-2)"/><path d="M9 19.5 20 10l11 9.5V29a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2z" fill="#fff"/><path d="M20 28.2s-5.6-3.4-5.6-7a3 3 0 0 1 5.6-1.6 3 3 0 0 1 5.6 1.6c0 3.6-5.6 7-5.6 7z" fill="var(--brand)"/></svg>

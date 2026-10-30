@@ -13,6 +13,7 @@ use Flatmates\Core\ValidationException;
 final class ImageService
 {
     public const MAX_BYTES = 6 * 1048576;
+    public const THUMB = 480;
     public const ALLOWED = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 
     public function __construct(private App $app)
@@ -25,12 +26,12 @@ final class ImageService
         if (!preg_match('/^[a-z]+$/', $dir)) {
             throw new \InvalidArgumentException('Invalid upload directory.');
         }
-        $name = $this->encode($this->validated($file), $this->app->config->storagePath('uploads/' . $dir), $maxSide);
+        $name = $this->encode($this->validated($file), $this->app->config->storagePath('uploads/' . $dir), $maxSide, '', self::THUMB);
         return $dir . '/' . $name;
     }
 
     /** Re-encode an uploaded image as JPEG into $absDir; returns the random file name. */
-    private function encode(string $tmp, string $absDir, int $maxSide, string $prefix = ''): string
+    private function encode(string $tmp, string $absDir, int $maxSide, string $prefix = '', int $thumb = 0): string
     {
         $info = @getimagesize($tmp);
         if (!$info || $info[0] < 100 || $info[1] < 100 || $info[0] * $info[1] > 40_000_000) {
@@ -66,6 +67,15 @@ final class ImageService
         $name = $prefix . bin2hex(random_bytes(16)) . '.jpg';
         if (!imagejpeg($dst, $absDir . '/' . $name, 82)) {
             throw new \RuntimeException('Could not save the image.');
+        }
+        if ($thumb > 0 && max($nw, $nh) > $thumb) {
+            // Small variant for cards and lists (served as name-sm.jpg)
+            $ts = $thumb / max($nw, $nh);
+            $tw = (int)max(1, round($nw * $ts));
+            $th = (int)max(1, round($nh * $ts));
+            $t = imagecreatetruecolor($tw, $th);
+            imagecopyresampled($t, $dst, 0, 0, 0, 0, $tw, $th, $nw, $nh);
+            imagejpeg($t, $absDir . '/' . substr($name, 0, -4) . '-sm.jpg', 78);
         }
         return $name;
     }
@@ -121,6 +131,7 @@ final class ImageService
             $root = realpath($this->app->config->storagePath());
             if ($p && $root && str_starts_with($p, $root)) {
                 @unlink($p);
+                @unlink(substr($p, 0, -4) . '-sm.jpg');
             }
         }
     }

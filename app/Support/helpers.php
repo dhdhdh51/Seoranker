@@ -44,9 +44,15 @@ function asset(string $path): string
     return base_path() . '/assets/' . ltrim($path, '/') . '?v=' . (is_file($file) ? substr(md5((string)filemtime($file)), 0, 8) : APP_VERSION);
 }
 
-function media_url(?string $path): ?string
+function media_url(?string $path, string $size = ''): ?string
 {
-    return $path ? base_path() . '/media/' . ltrim($path, '/') : null;
+    if (!$path) {
+        return null;
+    }
+    if ($size === 'sm' && str_ends_with($path, '.jpg')) {
+        $path = substr($path, 0, -4) . '-sm.jpg';
+    }
+    return base_path() . '/media/' . ltrim($path, '/');
 }
 
 function csrf_token(): string

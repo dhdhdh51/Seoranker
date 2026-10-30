@@ -23,7 +23,7 @@ final class ChatController extends Controller
     {
         $c = $this->chat()->conversationFor($this->user(), $id);
         $messages = $this->chat()->messages($this->user(), $id);
-        return $this->view('chat/show', ['title' => 'Chat with ' . $c['other_name'], 'c' => $c, 'messages' => $messages, 'noindex' => true, 'bodyClass' => 'chat-page']);
+        return $this->view('chat/show', ['title' => 'Chat with ' . $c['other_name'], 'c' => $c, 'messages' => $messages, 'conversations' => $this->chat()->inbox($this->user()), 'noindex' => true, 'bodyClass' => 'chat-page']);
     }
 
     public function messages(int $id): Response

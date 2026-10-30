@@ -339,6 +339,78 @@ final class HttpSmokeTest extends TestCase
         $this->assertSame(404, $this->req('GET', '/chat/999999', 'carol')['status']);
     }
 
+    public function testPremiumPagesTrustAndAppDownload(): void
+    {
+        $home = $this->req('GET', '/');
+        $this->assertContains('Find Your People.', $home['body']);
+        $this->assertContains('Discover compatible student flatmates, explore rooms and make your next move with confidence.', $home['body']);
+        $this->assertContains('Find My Flatmate', $home['body']);
+        $this->assertContains('Explore Rooms', $home['body']);
+        $this->assertContains('img/photos/friends-960.webp', $home['body']);
+        foreach (['testimonial', 'students trust', '4.9', 'rating'] as $fake) {
+            $this->assertNotContains($fake, strtolower($home['body']), 'no invented social proof');
+        }
+        // No release configured: honest message, no QR, no assetlinks
+        $app = $this->req('GET', '/app');
+        $this->assertSame(200, $app['status']);
+        $this->assertContains('No public release yet', $app['body']);
+        $this->assertNotContains('data-download-apk', $app['body']);
+        $this->assertSame(404, $this->req('GET', '/app/qr.svg')['status']);
+        $this->assertSame(404, $this->req('GET', '/.well-known/assetlinks.json')['status']);
+        // Configure a release (as an admin would after publishing)
+        $s = App::get()->settings();
+        $url = 'https://github.com/dhdhdh51/Seoranker/releases/download/flatmates-android-v1.0.0/student-flatmate-finder-1.0.0.apk';
+        $s->set('android.download_url', $url);
+        $s->set('android.releases_url', 'https://github.com/dhdhdh51/Seoranker/releases');
+        $s->set('android.version', '1.0.0');
+        $s->set('android.release_date', '2026-10-26');
+        $s->set('android.sha256', str_repeat('ab', 32));
+        $s->set('android.cert_sha256', implode(':', array_fill(0, 32, 'AB')));
+        $app = $this->req('GET', '/app');
+        $this->assertContains('href="' . $url . '"', $app['body']);
+        $this->assertContains('Version 1.0.0', $app['body']);
+        $this->assertContains(str_repeat('ab', 32), $app['body']);
+        $this->assertContains('Install unknown apps', $app['body']);
+        $this->assertNotContains('Play Protect off', $app['body']);
+        $qr = $this->req('GET', '/app/qr.svg');
+        $this->assertSame(200, $qr['status']);
+        $this->assertContains('image/svg+xml', $qr['headers']['content-type'] ?? '');
+        $this->assertContains('QR code: ' . $url, $qr['body'], 'QR encodes the configured download URL');
+        $al = json_decode($this->req('GET', '/.well-known/assetlinks.json')['body'], true);
+        $this->assertSame('in.noidarankers.flatmates', $al[0]['target']['package_name']);
+        $this->assertContains('Download Android App', $this->req('GET', '/')['body']);
+        // Inside the Android app the download CTAs are hidden
+        $inApp = $this->req('GET', '/', null, null, ['User-Agent: Mozilla/5.0 (Linux; Android 14; wv) FlatmatesAndroid/1.0.0']);
+        $this->assertContains('class="home in-app"', $inApp['body']);
+        // Listing detail: safety notice, costs, honest trust info
+        $l = $this->req('GET', '/rooms/' . self::$ids['listing_slug']);
+        $this->assertContains('Always view the property, verify who is authorized to offer it, understand the rental terms and obtain a written agreement before transferring money.', $l['body']);
+        $this->assertNotContains('Typical move-in cost', $l['body'], 'listing has no deposit → no invented total');
+        $this->assertContains('Not reviewed by a moderator yet', $l['body'], 'review switched off at creation → no badge');
+        $this->assertContains('Ownership is not verified', $l['body']);
+        $this->assertNotContains('>Listing Reviewed<', $l['body']);
+        // Thumbnails are served with the same access rules
+        $thumb = substr(self::$ids['photo'], 0, -4) . '-sm.jpg';
+        $this->assertSame(200, $this->req('GET', '/media/' . $thumb)['status']);
+        $this->assertSame(404, $this->req('GET', '/media/' . substr(self::$ids['carol_photo'], 0, -4) . '-sm.jpg')['status'], 'private profile thumbs need sign-in');
+        // Student pages render for a signed-in student
+        $this->login('carol2', 'carol@example.com');
+        foreach (['/dashboard', '/verify', '/safety', '/app', '/chat/' . self::$ids['conv']] as $p) {
+            $r = $this->req('GET', $p, 'carol2');
+            $this->assertSame(200, $r['status'], "GET $p");
+        }
+        $dash = $this->req('GET', '/dashboard', 'carol2')['body'];
+        $this->assertContains('Your trust badges', $dash);
+        $this->assertContains('Bob', $dash, 'match shown on dashboard');
+        $chat = $this->req('GET', '/chat/' . self::$ids['conv'], 'carol2')['body'];
+        $this->assertContains('class="chat-list"', $chat);
+        $this->assertContains('Report Bob', $chat);
+        $this->assertSame('/dashboard', $this->req('GET', '/', 'carol2')['headers']['location'] ?? '');
+        foreach (['android.download_url', 'android.releases_url', 'android.version', 'android.release_date', 'android.sha256', 'android.cert_sha256'] as $k) {
+            $s->set($k, '');
+        }
+    }
+
     public function testWebCronTriggerAndLogStaysClean(): void
     {
         $this->assertSame(403, $this->req('GET', '/cron.php?task=mail', null, null, ['X-Cron-Key: wrong'])['status']);

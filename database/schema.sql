@@ -182,6 +182,8 @@ CREATE TABLE IF NOT EXISTS listings (
   status          ENUM('draft','pending','published','hidden','rejected','closed') NOT NULL DEFAULT 'draft',
   visibility      ENUM('public','members') NOT NULL DEFAULT 'public',
   moderation_note VARCHAR(500) NULL,
+  reviewed_at     DATETIME NULL,
+  reviewed_by     INT UNSIGNED NULL,
   views           INT UNSIGNED NOT NULL DEFAULT 0,
   published_at    DATETIME NULL,
   created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -190,6 +192,7 @@ CREATE TABLE IF NOT EXISTS listings (
   UNIQUE KEY uq_listing_slug (slug),
   KEY idx_listing_search (status, city_id, type, rent),
   KEY idx_listing_user (user_id),
+  KEY idx_listing_public (status, visibility, published_at),
   CONSTRAINT fk_listing_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   CONSTRAINT fk_listing_city FOREIGN KEY (city_id) REFERENCES cities (id),
   CONSTRAINT fk_listing_college FOREIGN KEY (near_college_id) REFERENCES colleges (id) ON DELETE SET NULL
@@ -393,6 +396,6 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
   PRIMARY KEY (version)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT IGNORE INTO schema_migrations (version) VALUES ('001_baseline');
+INSERT IGNORE INTO schema_migrations (version) VALUES ('001_baseline'), ('002_trust_reviews');
 
 SET FOREIGN_KEY_CHECKS = 1;

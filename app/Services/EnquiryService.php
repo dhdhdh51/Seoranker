@@ -57,11 +57,16 @@ final class EnquiryService
 
     public function received(User $u): array
     {
-        return $this->app->db()->fetchAll("SELECT e.*, l.title, l.slug, p.display_name AS student_name, p.photo_path AS student_photo,
+        $rows = $this->app->db()->fetchAll("SELECT e.*, l.title, l.slug, p.display_name AS student_name, p.photo_path AS student_photo,
                 EXISTS (SELECT 1 FROM verifications v WHERE v.user_id = e.student_id AND v.status = 'approved') AS student_verified
             FROM enquiries e JOIN listings l ON l.id = e.listing_id LEFT JOIN profiles p ON p.user_id = e.student_id
             WHERE e.owner_id = ? AND NOT EXISTS (SELECT 1 FROM blocks b WHERE (b.blocker_id = e.owner_id AND b.blocked_id = e.student_id) OR (b.blocker_id = e.student_id AND b.blocked_id = e.owner_id))
             ORDER BY e.status = 'new' DESC, e.created_at DESC LIMIT 200", [$u->id]);
+        $badges = $this->app->make(TrustService::class)->forUsers(array_column($rows, 'student_id'));
+        foreach ($rows as &$r) {
+            $r['badges'] = $badges[(int)$r['student_id']] ?? [];
+        }
+        return $rows;
     }
 
     public function sent(User $u): array

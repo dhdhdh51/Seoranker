@@ -2,8 +2,8 @@
 /** @var string $title */
 $pageTitle = isset($title) && $title !== '' ? $title . ' | ' . brand() : brand() . ' — ' . setting('brand.tagline');
 $metaDesc = $description ?? (string)setting('seo.home_description');
-$primary = (string)setting('brand.primary_color', '#2f6fed');
-$accent = (string)setting('brand.accent_color', '#ff7a45');
+$primary = (string)setting('brand.primary_color', '#3478f6');
+$navy = (string)setting('brand.accent_color', '#142b4a');
 ?>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,10 +16,11 @@ $accent = (string)setting('brand.accent_color', '#ff7a45');
 <meta property="og:title" content="<?= e($title ?? brand()) ?>">
 <meta property="og:description" content="<?= e(str_limit($metaDesc, 200)) ?>">
 <meta property="og:type" content="website">
+<?php if (empty($ogImage)) { $ogImage = absolute_url('/assets/img/photos/friends-960.jpg'); } ?>
 <?php if (!empty($canonical)): ?><meta property="og:url" content="<?= e($canonical) ?>"><?php endif; ?>
 <?php if (!empty($ogImage)): ?><meta property="og:image" content="<?= e($ogImage) ?>"><?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="<?= e($primary) ?>">
+<meta name="theme-color" content="<?= e($navy) ?>">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <meta name="base-path" content="<?= e(base_path()) ?>">
 <link rel="icon" href="<?= e(asset('img/icon.svg')) ?>" type="image/svg+xml">
@@ -28,4 +29,5 @@ $accent = (string)setting('brand.accent_color', '#ff7a45');
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/bootstrap.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
-<style>:root{--brand:<?= e($primary) ?>;--accent:<?= e($accent) ?>}</style>
+<style>:root{--brand:<?= e($primary) ?>;--brand-2:<?= e($navy) ?>}</style>
+<?php if (!empty($preloadImage)): ?><link rel="preload" as="image" href="<?= e($preloadImage) ?>" type="image/webp" fetchpriority="high"><?php endif; ?>

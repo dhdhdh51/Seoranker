@@ -1,9 +1,9 @@
 {
   "name": "Student Flatmate Finder",
   "short_name": "Flatmates",
-  "start_url": "/discover",
+  "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2f6fed",
+  "background_color": "#f7f9fc",
+  "theme_color": "#142b4a",
   "icons": [{ "src": "/assets/img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }

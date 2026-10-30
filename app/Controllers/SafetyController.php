@@ -38,7 +38,7 @@ final class SafetyController extends Controller
         $svc = $this->app->make(VerificationService::class);
         $u = $this->user();
         $domains = $this->app->db()->fetchAll("SELECT co.name, co.email_domain, c.name AS city_name FROM colleges co JOIN cities c ON c.id = co.city_id WHERE co.active = 1 AND co.email_domain IS NOT NULL AND co.email_domain <> '' ORDER BY c.name, co.name");
-        return $this->view('safety/verify', ['title' => 'Verify you are a student', 'verified' => $svc->isVerified($u->id), 'history' => $svc->forUser($u->id), 'domains' => $domains, 'pendingEmail' => $_SESSION['_college_email'] ?? null, 'noindex' => true]);
+        return $this->view('safety/verify', ['title' => 'Verify you are a student', 'verified' => $svc->isVerified($u->id), 'badges' => $this->app->make(\Flatmates\Services\TrustService::class)->forUser($u->id), 'history' => $svc->forUser($u->id), 'domains' => $domains, 'pendingEmail' => $_SESSION['_college_email'] ?? null, 'noindex' => true]);
     }
 
     public function verifyEmail(): Response

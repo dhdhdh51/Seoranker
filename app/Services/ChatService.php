@@ -52,6 +52,7 @@ final class ChatService
         if (!$c) {
             throw new HttpException(404);
         }
+        $c['other_badges'] = $this->app->make(TrustService::class)->forUser((int)$c['other_id']);
         $c['can_send'] = $this->sendProblem($u, $c) === null;
         $c['send_problem'] = $this->sendProblem($u, $c);
         return $c;
@@ -131,7 +132,7 @@ final class ChatService
 
     public function inbox(User $u): array
     {
-        return $this->app->db()->fetchAll("SELECT c.id, c.type, c.last_message_at, c.created_at, l.title AS listing_title,
+        $rows = $this->app->db()->fetchAll("SELECT c.id, c.type, c.last_message_at, c.created_at, l.title AS listing_title,
                 o.user_id AS other_id, o.display_name AS other_name, o.photo_path AS other_photo,
                 (SELECT IF(m.hidden_at IS NULL, m.body, '[removed]') FROM messages m WHERE m.conversation_id = c.id ORDER BY m.id DESC LIMIT 1) AS last_body,
                 (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id AND m.sender_id <> ? AND m.read_at IS NULL AND m.hidden_at IS NULL) AS unread
@@ -141,6 +142,11 @@ final class ChatService
             WHERE (c.user_a = ? OR c.user_b = ?)
               AND NOT EXISTS (SELECT 1 FROM blocks b WHERE (b.blocker_id = c.user_a AND b.blocked_id = c.user_b) OR (b.blocker_id = c.user_b AND b.blocked_id = c.user_a))
             ORDER BY COALESCE(c.last_message_at, c.created_at) DESC LIMIT 200", [$u->id, $u->id, $u->id, $u->id]);
+        $badges = $this->app->make(TrustService::class)->forUsers(array_column($rows, 'other_id'));
+        foreach ($rows as &$r) {
+            $r['badges'] = $badges[(int)$r['other_id']] ?? [];
+        }
+        return $rows;
     }
 
     public function unreadTotal(int $userId): int

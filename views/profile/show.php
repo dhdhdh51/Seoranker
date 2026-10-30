@@ -9,10 +9,10 @@ $row = static function (string $icon, string $labelText, ?string $value): string
   <div class="col-lg-4">
     <div class="card shadow-sm border-0 text-center p-4">
       <div class="mx-auto mb-3"><?= avatar($p['photo_path'], $p['display_name'], 'xxl') ?></div>
-      <h1 class="h4 mb-1"><?= e($p['display_name']) ?><?= isset($p['age']) ? ', ' . (int)$p['age'] : '' ?>
-        <?php if ($p['verified']): ?><i class="bi bi-patch-check-fill text-primary" title="Verified student"></i><?php endif; ?></h1>
+      <h1 class="h4 mb-1"><?= e($p['display_name']) ?><?= isset($p['age']) ? ', ' . (int)$p['age'] : '' ?></h1>
       <div class="text-body-secondary small"><?= e(implode(' · ', array_filter([$p['college_name'] ?? null, $p['city_name'] ?? null]))) ?></div>
-      <div class="mt-2"><span class="badge text-bg-primary-subtle text-primary-emphasis"><?= e(label('accommodation_status', $p['accommodation_status'])) ?></span></div>
+      <div class="mt-2"><span class="chip"><?= e(label('accommodation_status', $p['accommodation_status'])) ?></span></div>
+      <?= \Flatmates\Http\View::partial('partials/badges', ['keys' => $p['badges'] ?? [], 'class' => 'justify-content-center mt-3']) ?>
       <?php if (!empty($compat)): ?>
         <div class="compat-ring mx-auto mt-3" style="--pct:<?= (int)$compat['score'] ?>"><span><?= (int)$compat['score'] ?>%</span></div>
         <div class="small text-body-secondary mt-1">compatibility</div>
@@ -22,7 +22,7 @@ $row = static function (string $icon, string $labelText, ?string $value): string
         <div class="d-grid gap-2 mt-3">
           <a class="btn btn-primary" href="<?= e(url('/onboarding/1')) ?>"><i class="bi bi-pencil me-1"></i>Edit profile</a>
           <a class="btn btn-outline-secondary" href="<?= e(url('/onboarding/4')) ?>"><i class="bi bi-shield-lock me-1"></i>Photo & privacy</a>
-          <?php if (!$p['verified']): ?><a class="btn btn-outline-primary" href="<?= e(url('/verify')) ?>"><i class="bi bi-patch-check me-1"></i>Get verified</a><?php endif; ?>
+          <a class="btn btn-outline-primary" href="<?= e(url('/verify')) ?>"><i class="bi bi-patch-check me-1" aria-hidden="true"></i>Verification centre</a>
         </div>
         <?php if (empty($raw['discoverable'])): ?><div class="alert alert-secondary small mt-3 mb-0">You are hidden from Discover.</div><?php endif; ?>
       <?php else: ?>
@@ -31,7 +31,7 @@ $row = static function (string $icon, string $labelText, ?string $value): string
           <button class="btn btn-outline-secondary" type="button" data-save="profile" data-id="<?= (int)$p['user_id'] ?>" aria-pressed="<?= !empty($saved) ? 'true' : 'false' ?>"><i class="bi bi-bookmark<?= !empty($saved) ? '-fill' : '' ?> me-1"></i><span><?= !empty($saved) ? 'Saved' : 'Save' ?></span></button>
           <div class="d-flex gap-2">
             <button class="btn btn-sm btn-link text-danger flex-fill" type="button" data-report="user" data-id="<?= (int)$p['user_id'] ?>"><i class="bi bi-flag"></i> Report</button>
-            <form method="post" action="<?= e(url('/block/' . (int)$p['user_id'])) ?>" class="flex-fill" data-confirm="Block <?= e($p['display_name']) ?>? You won't see each other anymore."><?= csrf_field() ?><button class="btn btn-sm btn-link text-danger w-100"><i class="bi bi-slash-circle"></i> Block</button></form>
+            <form method="post" action="<?= e(url('/block/' . (int)$p['user_id'])) ?>" class="flex-fill" data-confirm="Block <?= e($p['display_name']) ?>? You won't see each other anymore and any match or chat will end." data-confirm-ok="Block"><?= csrf_field() ?><button class="btn btn-sm btn-link text-danger w-100"><i class="bi bi-slash-circle"></i> Block</button></form>
           </div>
           <?php if (!empty($match)): ?><form method="post" action="<?= e(url('/matches/' . (int)$match['id'] . '/unmatch')) ?>" data-confirm="Unmatch? Your chat will close."><?= csrf_field() ?><button class="btn btn-sm btn-link text-body-secondary">Unmatch</button></form><?php endif; ?>
         </div>

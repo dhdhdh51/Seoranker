@@ -38,7 +38,7 @@
 <div class="card shadow-sm border-danger-subtle"><div class="card-body">
   <h2 class="h6 text-danger">Delete account</h2>
   <p class="small text-body-secondary">Your profile and listings are hidden immediately and everything is permanently deleted after <?= (int)$graceDays ?> days. You can cancel before then.</p>
-  <form method="post" action="<?= e(url('/account/delete')) ?>" class="d-flex gap-2 flex-wrap" data-confirm="Delete your account? This cannot be undone after <?= (int)$graceDays ?> days."><?= csrf_field() ?>
+  <form method="post" action="<?= e(url('/account/delete')) ?>" class="d-flex gap-2 flex-wrap" data-confirm="Delete your account? Your profile and listings are hidden now, and everything is permanently deleted after <?= (int)$graceDays ?> days unless you cancel." data-confirm-ok="Delete my account"><?= csrf_field() ?>
     <label class="visually-hidden" for="dp">Password</label><input class="form-control form-control-sm w-auto<?= invalid($errors, 'password') ?>" type="password" id="dp" name="password" placeholder="Your password" required autocomplete="current-password">
     <button class="btn btn-sm btn-danger">Delete my account</button></form>
 </div></div>

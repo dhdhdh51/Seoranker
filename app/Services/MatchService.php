@@ -228,10 +228,13 @@ final class MatchService
             $cards[] = $card;
         }
         usort($cards, static fn($x, $y) => $y['_rank'] <=> $x['_rank']);
-        return array_map(static function (array $c): array {
+        $cards = array_slice($cards, 0, $limit);
+        $badges = $this->app->make(TrustService::class)->forUsers(array_column($cards, 'user_id'));
+        return array_map(static function (array $c) use ($badges): array {
             unset($c['_rank']);
+            $c['badges'] = $badges[$c['user_id']] ?? [];
             return $c;
-        }, array_slice($cards, 0, $limit));
+        }, $cards);
     }
 
     public function swipesToday(int $userId): int
@@ -310,7 +313,7 @@ final class MatchService
     /** Active matches with the other student's card and conversation. */
     public function matches(User $u): array
     {
-        return $this->app->db()->fetchAll("SELECT m.id, m.score, m.created_at, o.user_id AS other_id, o.display_name, o.photo_path, co.name AS college_name, cv.id AS conversation_id, cv.last_message_at,
+        $rows = $this->app->db()->fetchAll("SELECT m.id, m.score, m.created_at, o.user_id AS other_id, o.display_name, o.photo_path, co.name AS college_name, cv.id AS conversation_id, cv.last_message_at,
                 (SELECT COUNT(*) FROM messages mm WHERE mm.conversation_id = cv.id AND mm.sender_id <> ? AND mm.read_at IS NULL AND mm.hidden_at IS NULL) AS unread
             FROM matches m
             JOIN profiles o ON o.user_id = IF(m.user_a = ?, m.user_b, m.user_a)
@@ -320,6 +323,11 @@ final class MatchService
             WHERE (m.user_a = ? OR m.user_b = ?) AND m.unmatched_at IS NULL
               AND NOT EXISTS (SELECT 1 FROM blocks b WHERE (b.blocker_id = m.user_a AND b.blocked_id = m.user_b) OR (b.blocker_id = m.user_b AND b.blocked_id = m.user_a))
             ORDER BY COALESCE(cv.last_message_at, m.created_at) DESC", [$u->id, $u->id, $u->id, $u->id]);
+        $badges = $this->app->make(TrustService::class)->forUsers(array_column($rows, 'other_id'));
+        foreach ($rows as &$r) {
+            $r['badges'] = $badges[(int)$r['other_id']] ?? [];
+        }
+        return $rows;
     }
 
     /** Number of people who liked $u and are waiting in their deck (count only — no identities). */

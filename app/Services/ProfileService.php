@@ -194,7 +194,9 @@ final class ProfileService
                 return null;
             }
         }
-        return self::present($row, $self);
+        $out = self::present($row, $self);
+        $out['badges'] = $this->app->make(TrustService::class)->forUser($targetId);
+        return $out;
     }
 
     /** Build the privacy-filtered card/profile array from a joined profile row. */

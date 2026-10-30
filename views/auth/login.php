@@ -1,4 +1,4 @@
-<h1 class="h4 mb-4">Welcome back</h1>
+<h1 class="h3 mb-1">Welcome back</h1><p class="text-body-secondary small mb-4">Sign in to see your matches and messages.</p>
 <form method="post" action="<?= e(url('/login')) ?>">
   <?= csrf_field() ?>
   <div class="mb-3"><label class="form-label" for="email">Email</label><input class="form-control" id="email" type="email" name="email" value="<?= e(old('email')) ?>" required autocomplete="username" autofocus></div>
